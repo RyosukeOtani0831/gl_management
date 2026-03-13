@@ -36,7 +36,7 @@ class DeliveryController extends Controller
             ]);
         } catch (\Exception $e) {
             report($e);
-            return redirect()->route('delivery_login')->with('error', 'グループ情報の取得に失敗しました。');
+            return redirect()->route('delivery_login')->with('error', 'ケース情報の取得に失敗しました。');
         }
     }
 

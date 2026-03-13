@@ -4,7 +4,7 @@
         <div class="modal-dialog modal-dialog-centerd role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title" id="myModalLabel">グループ編集</h4>
+                    <h4 class="modal-title" id="myModalLabel">ケース編集</h4>
                 </div>
                 <div id="editGroupModalBody" class="modal-body">
                     <p>変更を確定しますか？</p>

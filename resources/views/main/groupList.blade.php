@@ -1,8 +1,8 @@
 <!-- ヘッダーセクション -->
 <div class="flex items-center justify-between mb-6">
     <div>
-        <h2 class="text-2xl font-semibold text-gray-900">グループリスト</h2>
-        <p class="text-sm text-gray-600 mt-1">グループ数：{{ count($groupList) }}</p>
+        <h2 class="text-2xl font-semibold text-gray-900">ケースリスト</h2>
+        <p class="text-sm text-gray-600 mt-1">ケース数：{{ count($groupList) }}</p>
     </div>
     
     <div class="flex gap-2">
@@ -135,7 +135,7 @@
                 <label class="flex items-center gap-2 cursor-pointer">
                     <input type="checkbox" id="drawer-group-public" disabled
                            class="w-4 h-4 text-green-600 rounded focus:ring-green-500">
-                    <span class="text-sm text-gray-600">公開グループ</span>
+                    <span class="text-sm text-gray-600">公開ケース</span>
                 </label>
             </div>
         </div>
@@ -533,7 +533,7 @@ function toggleMemberRole(userId) {
 
 // メンバーを削除
 function removeMember(userId) {
-    if (confirm('このメンバーをグループから削除しますか？')) {
+    if (confirm('このメンバーをケースから削除しますか？')) {
         currentMembers = currentMembers.filter(m => m.id !== userId);
         renderMembers();
         // ユーザー選択リストも更新（削除したユーザーが再度選択可能になる）
@@ -548,7 +548,7 @@ function saveGroupChanges() {
     const teamId = document.getElementById('drawer-group-team').value;
     
     if (!groupName.trim()) {
-        alert('グループ名を入力してください');
+        alert('ケース名を入力してください');
         return;
     }
     
@@ -608,7 +608,7 @@ function saveGroupChanges() {
 
 // グループ削除確認
 function confirmDeleteGroup() {
-    if (!confirm('このグループを削除しますか？\nこの操作は取り消せません。')) {
+    if (!confirm('このケースを削除しますか？\nこの操作は取り消せません。')) {
         return;
     }
     

@@ -27,7 +27,7 @@
                                         <div class="modal-body">
 
                                         <div class="form-group row">
-                                            <p class="col-sm-2 col-form-label">グループ</p>
+                                            <p class="col-sm-2 col-form-label">ケース</p>
                                             <div class="col-sm-10">
                                                 <p class="modal-team"></p>
                                                 <select class="modal-team" name="roomId" required>
@@ -46,7 +46,7 @@
                                                     @endif
                                                 @endforeach
                                                 </select>
-                                                <p style="font-size:12px">※管理画面にログインしたユーザーが管理者になっている【公開グループ】にのみ投稿が可能です。</p>
+                                                <p style="font-size:12px">※管理画面にログインしたユーザーが管理者になっている【公開ケース】にのみ投稿が可能です。</p>
                                             </div>
                                         </div>
 

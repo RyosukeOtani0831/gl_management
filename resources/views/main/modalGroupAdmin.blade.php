@@ -12,7 +12,7 @@
                 @csrf
                 <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                     <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4" id="groupAdminModalTitle">
-                        グループ管理者操作
+                        ケース管理者操作
                     </h3>
                     <div id="groupAdminModalBody">
                         <!-- 動的に内容が挿入される -->
@@ -42,10 +42,10 @@ function openGroupAdminModal(type) {
 
     switch (type) {
         case 'groupAdminDel':
-            modalTitle = "グループ削除";
+            modalTitle = "ケース削除";
             modalBody = `
                 <div class="space-y-4">
-                    <p class="text-gray-700">選択したグループを削除しますか？</p>
+                    <p class="text-gray-700">選択したケースを削除しますか？</p>
                     <div id="delGroupAdminModalBody" class="text-sm text-gray-600"></div>
                 </div>
             `;
@@ -54,7 +54,7 @@ function openGroupAdminModal(type) {
             break;
 
         case 'groupAdminEdit':
-            modalTitle = "グループ（管理者）編集";
+            modalTitle = "ケース（管理者）編集";
             modalBody = `
                 <div class="space-y-4">
                     <p class="text-gray-700">変更を確定しますか？</p>
@@ -77,7 +77,7 @@ function openGroupAdminModal(type) {
             break;
         
         default:
-            modalTitle = "グループ管理者操作";
+            modalTitle = "ケース管理者操作";
             modalBody = "<p class='text-gray-700'>無効なリクエストです。</p>";
             formAction = "#";
             submitText = "実行";

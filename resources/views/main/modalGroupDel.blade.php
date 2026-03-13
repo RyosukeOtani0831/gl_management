@@ -4,10 +4,10 @@
         <div class="modal-dialog modal-dialog-centerd role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title" id="myModalLabel">グループ削除</h4>
+                    <h4 class="modal-title" id="myModalLabel">ケース削除</h4>
                 </div>
                 <div id="delGroupModalBody" class="modal-body">
-                    <p>選択したグループを削除しますか？</p>
+                    <p>選択したケースを削除しますか？</p>
                 </div>
                 <div class="modal-footer">
                     <a class="btn btn-light" data-dismiss="modal">閉じる</a>

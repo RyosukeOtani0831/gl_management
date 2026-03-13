@@ -3,7 +3,7 @@
     <div class="flex items-center justify-between mb-6">
         <div>
             <h2 class="text-2xl font-semibold text-gray-900">利用状況</h2>
-            <p id="groupCount" class="text-sm text-gray-600 mt-1">グループ数：{{ count($groupList) }}</p>
+            <p id="groupCount" class="text-sm text-gray-600 mt-1">ケース数：{{ count($groupList) }}</p>
         </div>
         
         <div class="flex gap-2">

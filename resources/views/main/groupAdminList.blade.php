@@ -1,8 +1,8 @@
 <!-- ヘッダーセクション -->
 <div class="flex items-center justify-between mb-6">
     <div>
-        <h2 class="text-2xl font-semibold text-gray-900">グループリスト（管理者）</h2>
-        <p id="groupAdminCount" class="text-sm text-gray-600 mt-1">グループ数：{{ count($groupList) }}</p>
+        <h2 class="text-2xl font-semibold text-gray-900">ケースリスト（管理者）</h2>
+        <p id="groupAdminCount" class="text-sm text-gray-600 mt-1">ケース数：{{ count($groupList) }}</p>
         <p id="checkGroupAdminCount" class="text-sm text-blue-600 mt-1">&nbsp;</p>
     </div>
     

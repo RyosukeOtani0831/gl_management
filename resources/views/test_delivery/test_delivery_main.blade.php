@@ -61,8 +61,8 @@
       <form role="form" class="form-inline login_delivery_form input-group" enctype="multipart/form-data" method="post" action="{{ action('TestDeliveryController@deliveryMessage')}}">
         @csrf
         <div class="mb-3 input_style">
-          <label for="toGroup" class="form-label">配信するグループ</label>
-          <label for="toGroup" class="form-label">※配信アカウントが参加している公開グループに対して一斉配信できます。</label>
+          <label for="toGroup" class="form-label">配信するケース</label>
+          <label for="toGroup" class="form-label">※配信アカウントが参加している公開ケースに対して一斉配信できます。</label>
           <select class="form-control input-lg" name="roomId" required>
             @foreach($groupList as $group)
             @php

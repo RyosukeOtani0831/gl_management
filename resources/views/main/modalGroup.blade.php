@@ -12,7 +12,7 @@
                 @csrf
                 <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                     <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4" id="groupModalTitle">
-                        グループ操作
+                        ケース操作
                     </h3>
                     <div id="groupModalBody">
                         <!-- 動的に内容が挿入される -->
@@ -42,11 +42,11 @@ function openGroupModal(type) {
 
     switch (type) {
         case 'groupAdd':
-            modalTitle = "グループ追加";
+            modalTitle = "ケース追加";
             modalBody = `
                 <div class="space-y-4">
                     <div>
-                        <label class="block text-gray-700 text-sm font-bold mb-2">グループ名:</label>
+                        <label class="block text-gray-700 text-sm font-bold mb-2">ケース名:</label>
                         <input type="text" name="name" required
                             class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
                     </div>
@@ -75,7 +75,7 @@ function openGroupModal(type) {
             break;
 
         case 'groupCsvAdd':
-            modalTitle = "CSVインポート（グループ一括登録）";
+            modalTitle = "CSVインポート（ケース一括登録）";
             modalBody = `
                 <div class="space-y-4">
                     <p class="text-gray-700">CSVファイルを選択してください</p>
@@ -88,10 +88,10 @@ function openGroupModal(type) {
             break;
 
         case 'groupDel':
-            modalTitle = "グループ削除";
+            modalTitle = "ケース削除";
             modalBody = `
                 <div class="space-y-4">
-                    <p class="text-gray-700">選択したグループを削除しますか？</p>
+                    <p class="text-gray-700">選択したケースを削除しますか？</p>
                     <div id="delGroupModalBody" class="text-sm text-gray-600"></div>
                 </div>
             `;
@@ -100,7 +100,7 @@ function openGroupModal(type) {
             break;
 
         case 'groupEdit':
-            modalTitle = "グループ編集";
+            modalTitle = "ケース編集";
             modalBody = `
                 <div class="space-y-4">
                     <p class="text-gray-700">変更を確定しますか？</p>
@@ -123,7 +123,7 @@ function openGroupModal(type) {
             break;
         
         default:
-            modalTitle = "グループ操作";
+            modalTitle = "ケース操作";
             modalBody = "<p class='text-gray-700'>無効なリクエストです。</p>";
             formAction = "#";
             submitText = "実行";

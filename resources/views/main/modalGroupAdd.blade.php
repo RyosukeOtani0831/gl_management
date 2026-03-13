@@ -4,12 +4,12 @@
         <div class="modal-dialog modal-dialog-centerd role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title" id="myModalLabel">グループ作成</h4>
+                    <h4 class="modal-title" id="myModalLabel">ケース作成</h4>
                 </div>
                 <div class="modal-body">
 
                     <div class="form-group row">
-                        <p class="col-sm-4 col-form-label">グループ名</p>
+                        <p class="col-sm-4 col-form-label">ケース名</p>
                         <div class="col-sm-8">
                             <p class="modal-name"></p>
                             <input class="modal-name" type="text" name="name" value=""　required>
