@@ -1,0 +1,8 @@
+
+   INFO  Processing jobs from the [default] queue.  
+
+  2024-12-09 07:29:56 App\Jobs\DeleteUserJob ....................... RUNNING
+  2024-12-09 07:30:51 App\Jobs\DeleteUserJob ...................... 55s FAIL
+  2024-12-09 07:30:52 App\Jobs\DeleteUserJob ....................... RUNNING
+  2024-12-09 07:31:45 App\Jobs\DeleteUserJob ...................... 53s FAIL
+  2024-12-09 07:31:45 App\Jobs\DeleteUserJob ....................... RUNNING
