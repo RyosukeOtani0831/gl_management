@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <meta name="Description" content="MediLine Workplace 管理画面" />
+    <meta name="Description" content="外来Law 管理画面" />
     <meta name="csrf-token" content="{{ csrf_token() }}">
     
     <!-- TailwindCSS CDN -->
@@ -28,14 +28,14 @@
     
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
-    <title>MediLine Workplace 管理画面</title>
+    <title>外来Law 管理画面</title>
 </head>
 
 <body class="bg-gray-100 min-h-screen">
     <div class="flex min-h-screen">
         <!-- サイドバー -->
         <aside class="w-64 bg-green-700 text-white flex flex-col py-8 px-4 sticky top-0 h-screen overflow-y-auto">
-            <h1 class="text-2xl font-bold mb-8">MediLine Workplace</h1>
+            <h1 class="text-2xl font-bold mb-8">外来Law</h1>
             @include('main/sidebar')
         </aside>
 

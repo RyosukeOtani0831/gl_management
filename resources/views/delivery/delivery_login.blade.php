@@ -15,7 +15,7 @@
     <div class="login_bg">
       <div class="login_title">
         <img class="app_logo" src="../assets/logo.svg" style="width:50px;"/>
-        <strong>MediLine Workplace</strong>
+        <strong>外来Law</strong>
         <h1>配信専用ページ</h1>
       </div>
 

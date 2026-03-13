@@ -8,6 +8,21 @@ use App\Exceptions\RedirectExceptions;
 
 class MedilineAPIController extends Controller
 {
+    private static function baseUrl(): string
+   {
+        return rtrim(env('GAIRAILAW_API_URL'), '/');
+    }
+ 
+    private static function adminUsername(): string
+    {
+        return env('GAIRAILAW_ADMIN_USERNAME');
+    }
+ 
+    private static function adminPassword(): string
+    {
+        return env('GAIRAILAW_ADMIN_PASSWORD');
+    }
+
     /**
      * セッション内の adminToken を確認し、なければ認証を行う
      */
@@ -32,16 +47,13 @@ class MedilineAPIController extends Controller
      */
     public static function auth()
     {
-        $adminUserName = 'smd';
-        $adminPassword = 'd)AdhdgS6/tU';
-
         try {
             $client = new Client();
 
-            $response = $client->post('https://smd.mediline.jp/api/management/auth', [
+            $response = $client->post(self::baseUrl() . '/api/management/auth', [
                 'json' => [
-                    'username' => $adminUserName,
-                    'password' => $adminPassword,
+                    'username' => self::adminUsername(),
+                    'password' => self::adminPassword(),
                 ],
                 'headers' => [
                     'Content-Type' => 'application/json',
@@ -56,7 +68,7 @@ class MedilineAPIController extends Controller
 
             return [
                 'token' => $data['data']['token'] ?? '',
-                'expires_in' => $data['data']['expires_in'] ?? 3600, // API が返さない場合は1時間で仮設定
+                'expires_in' => $data['data']['expires_in'] ?? 3600,
             ];
 
         } catch (\Exception $e) {
@@ -76,7 +88,7 @@ class MedilineAPIController extends Controller
 
         try {
             $client = new Client();
-            $response = $client->get('https://smd.mediline.jp/api/management/workplaces', [
+            $response = $client->get(self::baseUrl() . '/api/management/workplaces', [
                 'headers' => [
                     'Content-Type' => 'application/json',
                     'Adminaccesstoken' => $adminToken,
@@ -104,7 +116,7 @@ class MedilineAPIController extends Controller
      * @return array
      */
     public static function getUserList($workplaceId = -1, $page = 1, $fetchAll = false, $email = null)
-    { 
+    {
         self::sessionCheck();
         $adminToken = session('adminToken');
 
@@ -114,18 +126,17 @@ class MedilineAPIController extends Controller
 
         try {
             $client = new Client();
-            
+
             $query = [
                 'page' => $page,
                 'workplaceId' => $workplaceId,
             ];
-            
-            // メールアドレス検索の場合は追加
+
             if ($email) {
                 $query['email'] = $email;
             }
-            
-            $response = $client->get('https://smd.mediline.jp/api/management/users', [
+
+            $response = $client->get(self::baseUrl() . '/api/management/users', [
                 'headers' => [
                     'Content-Type' => 'application/json',
                     'Adminaccesstoken' => $adminToken,
@@ -139,7 +150,6 @@ class MedilineAPIController extends Controller
                 throw new \Exception($data['message']);
             }
 
-            // fetchAllがtrueで、かつメールアドレス検索でない場合のみ再帰
             if ($fetchAll && !$email) {
                 $remaining = $data['data']['count'] - $data['data']['limit'] * $page;
                 if ($remaining > 0) {
@@ -173,7 +183,7 @@ class MedilineAPIController extends Controller
 
         try {
             $client = new Client();
-            $response = $client->get('https://smd.mediline.jp/api/management/groups', [
+            $response = $client->get(self::baseUrl() . '/api/management/groups', [
                 'headers' => [
                     'Content-Type' => 'application/json',
                     'Adminaccesstoken' => $adminToken,
@@ -214,7 +224,7 @@ class MedilineAPIController extends Controller
 
         try {
             $client = new Client();
-            $response = $client->get('https://smd.mediline.jp/api/management/teams', [
+            $response = $client->get(self::baseUrl() . '/api/management/teams', [
                 'headers' => [
                     'Content-Type' => 'application/json',
                     'Adminaccesstoken' => $adminToken,
@@ -251,15 +261,14 @@ class MedilineAPIController extends Controller
     {
         self::sessionCheck();
         $adminToken = session('adminToken');
-        
-        // workplaceIdが指定されていない場合はセッションから取得
+
         if ($workplaceId === null && session()->has('workplaceId')) {
             $workplaceId = session('workplaceId');
         }
 
         try {
             $client = new Client();
-            $response = $client->get("https://smd.mediline.jp/api/management/users/{$userId}", [
+            $response = $client->get(self::baseUrl() . "/api/management/users/{$userId}", [
                 'headers' => [
                     'Content-Type' => 'application/json',
                     'Adminaccesstoken' => $adminToken,
@@ -292,7 +301,7 @@ class MedilineAPIController extends Controller
 
         try {
             $client = new Client();
-            $response = $client->post('https://smd.mediline.jp/api/management/users', [
+            $response = $client->post(self::baseUrl() . '/api/management/users', [
                 'json' => $data,
                 'headers' => [
                     'Content-Type' => 'application/json',
@@ -327,7 +336,7 @@ class MedilineAPIController extends Controller
         try {
             $client = new Client();
             $userId = $data['id'];
-            $response = $client->delete("https://smd.mediline.jp/api/management/users/{$userId}", [
+            $response = $client->delete(self::baseUrl() . "/api/management/users/{$userId}", [
                 'headers' => [
                     'Content-Type' => 'application/json',
                     'Adminaccesstoken' => $adminToken,
@@ -335,14 +344,13 @@ class MedilineAPIController extends Controller
             ]);
 
             $data = json_decode($response->getBody(), true);
-\Log::emergency('deleteUser 呼ばれた', $data);
+            \Log::emergency('deleteUser 呼ばれた', $data);
 
             if ($data['status'] === 'error') {
                 throw new \Exception($data['message']);
             }
 
-
-return $data;
+            return $data;
         } catch (\Exception $e) {
             report($e);
             throw new RedirectExceptions(route('main'), $e->getMessage());
@@ -360,7 +368,7 @@ return $data;
 
         try {
             $client = new Client();
-            $response = $client->put("https://smd.mediline.jp/api/management/users/{$userId}", [
+            $response = $client->put(self::baseUrl() . "/api/management/users/{$userId}", [
                 'json' => $data,
                 'headers' => [
                     'Content-Type' => 'application/json',
@@ -391,7 +399,7 @@ return $data;
 
         try {
             $client = new Client();
-            $response = $client->get("https://smd.mediline.jp/api/management/groups/{$groupId}", [
+            $response = $client->get(self::baseUrl() . "/api/management/groups/{$groupId}", [
                 'headers' => [
                     'Content-Type' => 'application/json',
                     'Adminaccesstoken' => $adminToken,
@@ -421,7 +429,7 @@ return $data;
 
         try {
             $client = new Client();
-            $response = $client->post('https://smd.mediline.jp/api/management/groups', [
+            $response = $client->post(self::baseUrl() . '/api/management/groups', [
                 'json' => [
                     'name' => $data['name'],
                     'public' => $data['public'],
@@ -458,7 +466,7 @@ return $data;
 
         try {
             $client = new Client();
-            $response = $client->delete("https://smd.mediline.jp/api/management/groups/{$groupId}", [
+            $response = $client->delete(self::baseUrl() . "/api/management/groups/{$groupId}", [
                 'headers' => [
                     'Content-Type' => 'application/json',
                     'Adminaccesstoken' => $adminToken,
@@ -489,7 +497,7 @@ return $data;
 
         try {
             $client = new Client();
-            $response = $client->put("https://smd.mediline.jp/api/management/groups/{$groupId}", [
+            $response = $client->put(self::baseUrl() . "/api/management/groups/{$groupId}", [
                 'json' => [
                     'avatarFileId' => (int)$data['avatarFileId'],
                     'public' => filter_var($data['public'], FILTER_VALIDATE_BOOLEAN),
@@ -526,7 +534,7 @@ return $data;
 
         try {
             $client = new Client();
-            $response = $client->put("https://smd.mediline.jp/api/management/groups/{$groupId}/add", [
+            $response = $client->put(self::baseUrl() . "/api/management/groups/{$groupId}/add", [
                 'json' => [
                     'usersIds' => $data['usersIds'],
                     'admin' => filter_var($data['admin'], FILTER_VALIDATE_BOOLEAN),
@@ -562,7 +570,7 @@ return $data;
 
         try {
             $client = new Client();
-            $response = $client->delete("https://smd.mediline.jp/api/management/groups/{$groupId}/{$userId}", [
+            $response = $client->delete(self::baseUrl() . "/api/management/groups/{$groupId}/{$userId}", [
                 'headers' => [
                     'Content-Type' => 'application/json',
                     'Adminaccesstoken' => $adminToken,
@@ -593,7 +601,7 @@ return $data;
 
         try {
             $client = new Client();
-            $response = $client->put("https://smd.mediline.jp/api/management/groups/{$groupId}/teams/add", [
+            $response = $client->put(self::baseUrl() . "/api/management/groups/{$groupId}/teams/add", [
                 'json' => [
                     'teamsIds' => [(int)$data['teamId']],
                 ],
@@ -628,7 +636,7 @@ return $data;
 
         try {
             $client = new Client();
-            $response = $client->delete("https://smd.mediline.jp/api/management/groups/{$roomId}/teams/{$teamId}", [
+            $response = $client->delete(self::baseUrl() . "/api/management/groups/{$roomId}/teams/{$teamId}", [
                 'headers' => [
                     'Content-Type' => 'application/json',
                     'Adminaccesstoken' => $adminToken,
@@ -648,6 +656,7 @@ return $data;
             throw new RedirectExceptions(route('main'), $e->getMessage());
         }
     }
+
     /**
      * チーム作成
      */
@@ -658,7 +667,7 @@ return $data;
 
         try {
             $client = new Client();
-            $response = $client->post('https://smd.mediline.jp/api/management/teams', [
+            $response = $client->post(self::baseUrl() . '/api/management/teams', [
                 'json' => [
                     'name' => $data['name'],
                     'workplaceId' => session('workplaceId'),
@@ -693,7 +702,7 @@ return $data;
 
         try {
             $client = new Client();
-            $response = $client->put("https://smd.mediline.jp/api/management/teams/{$teamId}", [
+            $response = $client->put(self::baseUrl() . "/api/management/teams/{$teamId}", [
                 'json' => [
                     'name' => $data['name'],
                     'workplaceId' => session('workplaceId'),
@@ -728,7 +737,7 @@ return $data;
 
         try {
             $client = new Client();
-            $response = $client->delete("https://smd.mediline.jp/api/management/teams/{$teamId}", [
+            $response = $client->delete(self::baseUrl() . "/api/management/teams/{$teamId}", [
                 'headers' => [
                     'Content-Type' => 'application/json',
                     'Adminaccesstoken' => $adminToken,
@@ -758,7 +767,7 @@ return $data;
 
         try {
             $client = new Client();
-            $response = $client->post('https://smd.mediline.jp/api/management/message', [
+            $response = $client->post(self::baseUrl() . '/api/management/message', [
                 'json' => [
                     'roomId' => (int)$data['roomId'],
                     'type' => $data['type'],
@@ -791,43 +800,33 @@ return $data;
     public static function getRoomMessageCount($data)
     {
         self::sessionCheck();
-    
-        // セッションからadminTokenを取得
         $adminToken = session('adminToken');
-    
-        // adminTokenが無い場合のエラーチェック
+
         if (empty($adminToken)) {
             throw new \Exception('Admin token is missing.');
         }
-    
+
         try {
-            // GuzzleHttpのクライアントを作成
             $client = new Client();
-    
-            // GETリクエストを実行
-            $response = $client->get("https://smd.mediline.jp/api/management/counts/messages/{$data['roomId']}", [
+            $response = $client->get(self::baseUrl() . "/api/management/counts/messages/{$data['roomId']}", [
                 'headers' => [
                     'Content-Type' => 'application/json',
                     'Adminaccesstoken' => $adminToken,
                 ],
             ]);
-    
-            // レスポンスボディを取得して配列に変換
+
             $data = json_decode($response->getBody(), true);
-    
-            // statusがerrorの場合は例外をスロー
+
             if ($data['status'] === 'error') {
                 throw new \Exception($data['message']);
             }
-    
+
             return $data;
-    
+
         } catch (\GuzzleHttp\Exception\RequestException $e) {
-            // Guzzleのリクエストエラーに対するハンドリング
             report($e);
             throw new \Exception("Request failed: " . $e->getMessage());
         } catch (\Exception $e) {
-            // その他の例外に対するハンドリング
             report($e);
             throw new RedirectExceptions(route('main'), $e->getMessage());
         }
@@ -835,13 +834,12 @@ return $data;
 
     public static function postUploadFile($data)
     {
-        self::sessionCheck();  // セッションチェック
+        self::sessionCheck();
         $adminToken = session('adminToken');
 
         try {
-            // Guzzle HTTPクライアントのインスタンスを作成
             $client = new Client();
-            $response = $client->post('https://smd.mediline.jp/api/upload/files', [
+            $response = $client->post(self::baseUrl() . '/api/upload/files', [
                 'json' => [
                     'chunk' => $data['chunk'],
                     'offset' => $data['offset'],
@@ -879,13 +877,12 @@ return $data;
 
     public static function postUploadFileVerify($data)
     {
-        self::sessionCheck();  // セッションチェック
+        self::sessionCheck();
         $adminToken = session('adminToken');
 
         try {
-            // Guzzle HTTPクライアントのインスタンスを作成
             $client = new Client();
-            $response = $client->post('https://smd.mediline.jp/api/upload/files/verify', [
+            $response = $client->post(self::baseUrl() . '/api/upload/files/verify', [
                 'json' => [
                     'total' => $data['total'],
                     'size' => $data['size'],
@@ -896,12 +893,12 @@ return $data;
                     'clientId' => $data['clientId'],
                     'metaData' => $data['metaData'],
                 ],
-               'headers' => [
+                'headers' => [
                     'Content-Type' => 'application/json',
                     'Adminaccesstoken' => $adminToken,
                 ],
             ]);
-            
+
             $res = json_decode($response->getBody(), true);
 
             if (isset($res['status']) && $res['status'] === 'error') {
@@ -910,16 +907,10 @@ return $data;
 
             return $res;
         } catch (\GuzzleHttp\Exception\RequestException $e) {
-            // Guzzleのリクエストエラーをキャッチして内容を確認
             if ($e->hasResponse()) {
-                // エラーレスポンスのステータスコード
-                // var_dump($e->getResponse()->getStatusCode());
-        
-                // エラーレスポンスのボディ
-                // var_dump((string)$e->getResponse()->getBody());
+                // エラーレスポンスのステータスコード / ボディは必要に応じてログへ
             } else {
-                // レスポンスがない場合のエラー内容
-                // var_dump($e->getMessage());
+                // レスポンスがない場合
             }
         }
     }
@@ -929,15 +920,12 @@ return $data;
      */
     public static function getAdminToken()
     {
-        $adminUserName = 'smd';
-        $adminPassword = 'd)AdhdgS6/tU';
-
         try {
             $client = new Client();
-            $response = $client->post('https://smd.mediline.jp/api/management/auth', [
+            $response = $client->post(self::baseUrl() . '/api/management/auth', [
                 'json' => [
-                    'username' => $adminUserName,
-                    'password' => $adminPassword,
+                    'username' => self::adminUsername(),
+                    'password' => self::adminPassword(),
                 ],
                 'headers' => [
                     'Content-Type' => 'application/json',
@@ -964,11 +952,11 @@ return $data;
     {
         try {
             $client = new Client([
-                'timeout' => 180,  // 3分のタイムアウト
+                'timeout' => 180,
                 'connect_timeout' => 30,
             ]);
-            
-            $response = $client->delete("https://smd.mediline.jp/api/management/users/{$userId}", [
+
+            $response = $client->delete(self::baseUrl() . "/api/management/users/{$userId}", [
                 'headers' => [
                     'Content-Type' => 'application/json',
                     'Adminaccesstoken' => $adminToken,

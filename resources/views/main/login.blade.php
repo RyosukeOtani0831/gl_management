@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>MediLine Workplace 管理画面ログイン</title>
+    <title>外来Law 管理画面ログイン</title>
     
     <!-- TailwindCSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -33,7 +33,7 @@
     <div class="relative z-10 bg-white rounded-lg shadow-2xl p-8 w-full max-w-md mx-4">
         <!-- タイトル -->
         <div class="text-center mb-8">
-            <h1 class="text-3xl font-bold text-gray-800 mb-2">MediLine Workplace</h1>
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">外来Law</h1>
             <p class="text-gray-600">管理画面ログイン</p>
         </div>
 

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Eメール登録時の注意事項 - MediLine Workplace</title>
+    <title>Eメール登録時の注意事項 - 外来Law</title>
     
     <!-- TailwindCSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -14,7 +14,7 @@
     <div class="bg-white rounded-lg shadow-2xl p-8 w-full max-w-2xl mx-4">
         <!-- タイトル -->
         <div class="text-center mb-8">
-            <h1 class="text-3xl font-bold text-gray-800 mb-2">MediLine Workplace</h1>
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">外来Law</h1>
             <p class="text-xl text-gray-600">Eメール登録時の注意事項</p>
         </div>
 
@@ -39,7 +39,7 @@
                         迷惑メールの対策などで、メールが受信できない場合がございます。
                     </p>
                     <p class="pl-4 mt-2">
-                        事前に「<span class="text-red-600 font-semibold">@mediline.jp</span>」を受信できるように設定してください。
+                        事前に「<span class="text-red-600 font-semibold">@gairailaw.com</span>」を受信できるように設定してください。
                     </p>
                     <p class="pl-4">
                         設定方法は、各キャリアのWEBサイトをご覧ください。
@@ -60,7 +60,7 @@
                         「迷惑メール」に振り分けられる場合があります。
                     </p>
                     <p class="mt-2">
-                        受信後に、「<span class="text-red-600 font-semibold">@mediline.jp</span>」を迷惑メールの対象から除外設定してください。
+                        受信後に、「<span class="text-red-600 font-semibold">@gairailaw.com</span>」を迷惑メールの対象から除外設定してください。
                     </p>
                 </div>
             </div>
