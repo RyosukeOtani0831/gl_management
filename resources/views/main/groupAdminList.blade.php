@@ -42,7 +42,7 @@
                         <th class="px-4 py-3 font-semibold text-gray-700" style="min-width: 50px;">
                             <i class="fas fa-check"></i>
                         </th>
-                        <th class="px-4 py-3 font-semibold text-gray-700" style="min-width: 250px;">Group Name</th>
+                        <th class="px-4 py-3 font-semibold text-gray-700" style="min-width: 250px;">Case Name</th>
                         <th class="px-4 py-3 font-semibold text-gray-700" style="min-width: 110px;">Public</th>
                         @foreach($userListAll as $user)
                             <th class="px-4 py-3 font-semibold text-gray-700">{{$user['displayName']}}</th>

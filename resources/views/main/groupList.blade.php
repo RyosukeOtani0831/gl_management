@@ -24,7 +24,7 @@
             <thead class="bg-green-50 sticky top-0" style="z-index: 10;">
                 <tr>
                     <th class="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase">#</th>
-                    <th class="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase">Group Name</th>
+                    <th class="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase">Case Name</th>
                     <th class="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase">Team</th>
                     <th class="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase">ステータス</th>
                     <th class="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase">メンバー</th>

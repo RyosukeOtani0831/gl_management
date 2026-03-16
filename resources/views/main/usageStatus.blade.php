@@ -21,7 +21,7 @@
                 <thead class="bg-gray-50 sticky-top" style="z-index: 10;">
                     <tr>
                         <th class="px-4 py-3 font-semibold text-gray-700" style="width: 50px;">#</th>
-                        <th class="px-4 py-3 font-semibold text-gray-700" style="width: 200px;">Group Name</th>
+                        <th class="px-4 py-3 font-semibold text-gray-700" style="width: 200px;">Case Name</th>
                         <th class="px-4 py-3 font-semibold text-gray-700" style="width: 150px;">Team</th>
                         <th class="px-4 py-3 font-semibold text-gray-700" style="width: 100px;">ステータス</th>
                         <th class="px-4 py-3 font-semibold text-gray-700" style="width: 100px;">ユーザ数</th>
