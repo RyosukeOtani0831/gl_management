@@ -191,7 +191,7 @@ class MainController extends Controller
         
         $userTempList = MySQLController::SelectUserAll();
 
-        $groupPermissionInfo = ['hideGroupPermission' => self::hideGroupPermission()];
+        $groupPermissionInfo = ['hideGroupPermission' => self::hideGroupPermission(), 'useProvisionalFlow' => self::useProvisionalFlow()];
 
         $csvUserHeaders = array_merge(CsvController::CSV_USER_HEADER, CsvController::CSV_USER_EDIT_HEADER);
 
@@ -819,7 +819,7 @@ class MainController extends Controller
                 $userListAll = [];
             }
             
-            $groupPermissionInfo = ['hideGroupPermission' => self::hideGroupPermission()];
+            $groupPermissionInfo = ['hideGroupPermission' => self::hideGroupPermission(), 'useProvisionalFlow' => self::useProvisionalFlow()];
             
             return [
                 'teamList' => $teamList,
@@ -835,7 +835,7 @@ class MainController extends Controller
                 'teamList' => [],
                 'groupList' => [],
                 'userListAll' => [],
-                'groupPermissionInfo' => ['hideGroupPermission' => self::hideGroupPermission()],
+                'groupPermissionInfo' => ['hideGroupPermission' => self::hideGroupPermission(), 'useProvisionalFlow' => self::useProvisionalFlow()],
                 'loginUserId' => session('userId'),
             ];
         }
