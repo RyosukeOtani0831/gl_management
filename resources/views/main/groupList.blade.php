@@ -116,7 +116,7 @@
     <!-- ヘッダー -->
     <div class="px-6 py-5 border-b bg-gray-50 flex justify-between items-start">
         <div class="flex-1 mr-4">
-            <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Group Details</span>
+            <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Case Details</span>
             <div class="flex items-center gap-2 mt-1">
                 <input type="text" id="drawer-group-name" 
                        class="text-2xl font-bold text-gray-800 border-0 p-0 focus:ring-0 bg-transparent w-full" 
@@ -341,7 +341,8 @@ function loadGroupMembers(groupId) {
                     displayName: m.displayName,
                     emailAddress: m.emailAddress || '',
                     kana: m.kana || '',
-                    isAdmin: m.isAdmin === true || m.isAdmin === 1  // 厳密にチェック
+                    isAdmin: m.isAdmin === true || m.isAdmin === 1,  // 厳密にチェック
+                    accountType: m.accountType || 'internal',
                 };
             });
             
@@ -407,6 +408,10 @@ function renderMembers() {
                         <div class="text-sm font-bold text-gray-900">${member.displayName}</div>
                         <div class="text-xs text-gray-500">${member.emailAddress || ''}</div>
                     </div>
+                    ${member.accountType === 'external'
+                        ? '<span class="bg-orange-100 text-orange-700 px-2 py-0.5 rounded text-xs font-medium">外部</span>'
+                        : '<span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs font-medium">内部</span>'
+                    }
                     ${badgeDisplay}
                 </div>
                 <div class="flex items-center gap-2">
@@ -493,6 +498,10 @@ function renderUserSelectList(query) {
                     <div class="text-sm font-medium text-gray-900 truncate">${user.displayName}</div>
                     <div class="text-xs text-gray-500 truncate">${user.emailAddress || ''}</div>
                 </div>
+                ${user.accountType === 'external'
+                    ? '<span class="bg-orange-100 text-orange-700 px-2 py-0.5 rounded text-xs font-medium flex-shrink-0">外部</span>'
+                    : '<span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs font-medium flex-shrink-0">内部</span>'
+                }
             </label>
         `;
     });

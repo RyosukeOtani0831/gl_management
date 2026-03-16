@@ -894,7 +894,8 @@ class MainController extends Controller
                         'displayName' => $user['displayName'],
                         'emailAddress' => $user['emailAddress'] ?? '',
                         'kana' => $user['kana'] ?? '',
-                        'isAdmin' => $isAdmin
+                        'isAdmin' => $isAdmin,
+                        'accountType' => $user['accountType'] ?? 'internal',
                     ];
                 }
             }
