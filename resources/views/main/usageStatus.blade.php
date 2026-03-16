@@ -23,7 +23,7 @@
                         <th class="px-4 py-3 font-semibold text-gray-700" style="width: 50px;">#</th>
                         <th class="px-4 py-3 font-semibold text-gray-700" style="width: 200px;">Group Name</th>
                         <th class="px-4 py-3 font-semibold text-gray-700" style="width: 150px;">Team</th>
-                        <th class="px-4 py-3 font-semibold text-gray-700" style="width: 100px;">Public</th>
+                        <th class="px-4 py-3 font-semibold text-gray-700" style="width: 100px;">ステータス</th>
                         <th class="px-4 py-3 font-semibold text-gray-700" style="width: 100px;">ユーザ数</th>
                         <th class="px-4 py-3 font-semibold text-gray-700" style="width: 100px;">投稿数</th>
                     </tr>
@@ -43,16 +43,11 @@
                                        value="{{$group['teams'][0]['name'] ?? ''}}" disabled />
                             </td>
                             <td class="px-4 py-2">
-                                <select id="usageStatusPublicSelect{{$group['id']}}" disabled
-                                        class="bg-gray-50 border border-gray-300 rounded-lg p-2 w-full disabled:bg-gray-100">
-                                    @if($group['public'])
-                                        <option name="usageStatusPublic{{$group['id']}}" value="0">非公開</option>
-                                        <option name="usageStatusPublic{{$group['id']}}" value="1" selected>公開</option>
-                                    @else
-                                        <option name="usageStatusPublic{{$group['id']}}" value="0" selected>非公開</option>
-                                        <option name="usageStatusPublic{{$group['id']}}" value="1">公開</option>
-                                    @endif
-                                </select>
+                                @if(!empty($group['isClosed']))
+                                    <span class="bg-red-100 text-red-800 px-2 py-1 rounded text-xs font-medium">
+                                        <i class="fa fa-check mr-1"></i>クローズ
+                                    </span>
+                                @endif
                             </td>
                             <td class="px-4 py-2">
                                 <input name="usageStatusMember{{$group['id']}}" 

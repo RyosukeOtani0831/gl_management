@@ -4,18 +4,14 @@
     </a>
     
     <a href="#group" class="nav-link py-2 px-4 rounded hover:bg-green-600 transition flex items-center">
-        <i class="fas fa-users-cog mr-2"></i>Group List
+        <i class="fas fa-users-cog mr-2"></i>Case List
     </a>
     
     <a href="#user" class="nav-link py-2 px-4 rounded hover:bg-green-600 transition flex items-center">
         <i class="fas fa-user mr-2"></i>User List
     </a>
     
-    @if($groupPermissionInfo['hideGroupPermission'])
-        <a href="#userTemp" class="nav-link py-2 px-4 rounded hover:bg-green-600 transition flex items-center">
-            <i class="fas fa-user-clock mr-2"></i>User Temp List
-        </a>
-    @endif
+    {{-- UserTempListは外来Lawでは非表示 --}}
     
     <a href="#usageStatus" class="nav-link py-2 px-4 rounded hover:bg-green-600 transition flex items-center">
         <i class="fas fa-chart-bar mr-2"></i>利用状況

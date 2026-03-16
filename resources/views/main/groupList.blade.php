@@ -75,9 +75,9 @@
                         </td>
                         <td class="px-6 py-4">
                             @if(!empty($group['isClosed']))
-                                <span class="bg-red-100 text-red-800 px-2 py-1 rounded text-xs font-medium">クローズ</span>
-                            @else
-                                <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-medium">オープン</span>
+                                <span class="bg-red-100 text-red-800 px-2 py-1 rounded text-xs font-medium">
+                                    <i class="fa fa-check mr-1"></i>クローズ
+                                </span>
                             @endif
                         </td>
                         <td class="px-6 py-4 text-gray-500">
@@ -244,7 +244,7 @@ function updateCloseBtn(isClosed) {
     const btn = document.getElementById('drawer-group-close-btn');
     if (!btn) return;
     if (isClosed) {
-        btn.textContent = 'オープンに戻す';
+        btn.textContent = 'ケースを再開する';
         btn.className = 'px-3 py-1 rounded text-sm font-medium transition bg-green-100 text-green-800 hover:bg-green-200';
     } else {
         btn.textContent = 'クローズする';

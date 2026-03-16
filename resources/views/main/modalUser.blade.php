@@ -72,6 +72,14 @@ function openUserModal(type) {
                         </select>
                     </div>
                     <div>
+                        <label for="accountType" class="block text-gray-700 text-sm font-bold mb-2">アカウント種別:</label>
+                        <select name="accountType" required
+                                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                            <option value="internal">内部</option>
+                            <option value="external">外部</option>
+                        </select>
+                    </div>
+                    <div>
                         <label for="start_date" class="block text-gray-700 text-sm font-bold mb-2">利用開始日:</label>
                         <input type="date" name="validFrom"
                                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
@@ -80,14 +88,6 @@ function openUserModal(type) {
                         <label for="end_date" class="block text-gray-700 text-sm font-bold mb-2">利用終了日:</label>
                         <input type="date" name="validTo"
                                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                    </div>
-                    <div>
-                        <label for="accountType" class="block text-gray-700 text-sm font-bold mb-2">アカウント種別:</label>
-                        <select name="accountType" required
-                                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                            <option value="internal">内部</option>
-                            <option value="external">外部</option>
-                        </select>
                     </div>
                 </div>
             `;

@@ -77,11 +77,11 @@
                             <th class="px-4 py-3 font-semibold text-gray-700" style="min-width: 150px;">カナ</th>
                             <th class="px-4 py-3 font-semibold text-gray-700" style="min-width: 200px;">メール</th>
                             <th class="px-4 py-3 font-semibold text-gray-700" style="min-width: 150px;">チーム</th>
+                            <th class="px-4 py-3 font-semibold text-gray-700">アカウント種別</th>
                             <th class="px-4 py-3 font-semibold text-gray-700">利用開始日</th>
                             <th class="px-4 py-3 font-semibold text-gray-700">利用終了日</th>
                             <th class="px-4 py-3 font-semibold text-gray-700">ユーザーコメント</th>
                             <th class="px-4 py-3 font-semibold text-gray-700">管理者コメント</th>
-                            <th class="px-4 py-3 font-semibold text-gray-700">アカウント種別</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -153,6 +153,16 @@
                             </td>
                             <td class="px-4 py-2">
                                 @php
+                                    $accountType = is_object($user) ? ($user->accountType ?? 'internal') : ($user['accountType'] ?? 'internal');
+                                @endphp
+                                <select name="userAccountType{{$userId}}" disabled
+                                        class="bg-gray-50 border border-gray-300 rounded-lg p-2 w-full focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100">
+                                    <option value="internal" {{ $accountType === 'internal' ? 'selected' : '' }}>内部</option>
+                                    <option value="external" {{ $accountType === 'external' ? 'selected' : '' }}>外部</option>
+                                </select>
+                            </td>
+                            <td class="px-4 py-2">
+                                @php
                                     $validFrom = is_object($user) ? ($user->validFrom ?? '') : ($user['validFrom'] ?? '');
                                     $validFromDate = $validFrom ? substr($validFrom, 0, 10) : '';
                                 @endphp
@@ -182,16 +192,6 @@
                                 @endphp
                                 <textarea name="userAuthDescription{{$userId}}" rows="1" disabled
                                           class="bg-gray-50 border border-gray-300 rounded-lg p-2 w-full focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100">{{$authDescription}}</textarea>
-                            </td>
-                            <td class="px-4 py-2">
-                                @php
-                                    $accountType = is_object($user) ? ($user->accountType ?? 'internal') : ($user['accountType'] ?? 'internal');
-                                @endphp
-                                <select name="userAccountType{{$userId}}" disabled
-                                        class="bg-gray-50 border border-gray-300 rounded-lg p-2 w-full focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100">
-                                    <option value="internal" {{ $accountType === 'internal' ? 'selected' : '' }}>内部</option>
-                                    <option value="external" {{ $accountType === 'external' ? 'selected' : '' }}>外部</option>
-                                </select>
                             </td>
                         </tr>
                         @endforeach
@@ -509,6 +509,13 @@ function createUserRow(user, rowNumber, teamList) {
             </select>
         </td>
         <td class="px-4 py-2">
+            <select name="userAccountType${userId}" disabled
+                    class="bg-gray-50 border border-gray-300 rounded-lg p-2 w-full focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100">
+                <option value="internal" ${accountType === 'internal' ? 'selected' : ''}>内部</option>
+                <option value="external" ${accountType === 'external' ? 'selected' : ''}>外部</option>
+            </select>
+        </td>
+        <td class="px-4 py-2">
             <input type="date" name="userValidFrom${userId}" value="${validFrom}"
                    disabled
                    class="bg-gray-50 border border-gray-300 rounded-lg p-2 w-full focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100" />
@@ -525,13 +532,6 @@ function createUserRow(user, rowNumber, teamList) {
         <td class="px-4 py-2">
             <textarea name="userAuthDescription${userId}" rows="1" disabled
                       class="bg-gray-50 border border-gray-300 rounded-lg p-2 w-full focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100">${authDescription}</textarea>
-        </td>
-        <td class="px-4 py-2">
-            <select name="userAccountType${userId}" disabled
-                    class="bg-gray-50 border border-gray-300 rounded-lg p-2 w-full focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100">
-                <option value="internal" ${accountType === 'internal' ? 'selected' : ''}>内部</option>
-                <option value="external" ${accountType === 'external' ? 'selected' : ''}>外部</option>
-            </select>
         </td>
     `;
     
