@@ -81,6 +81,7 @@
                             <th class="px-4 py-3 font-semibold text-gray-700">利用終了日</th>
                             <th class="px-4 py-3 font-semibold text-gray-700">ユーザーコメント</th>
                             <th class="px-4 py-3 font-semibold text-gray-700">管理者コメント</th>
+                            <th class="px-4 py-3 font-semibold text-gray-700">アカウント種別</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -181,6 +182,16 @@
                                 @endphp
                                 <textarea name="userAuthDescription{{$userId}}" rows="1" disabled
                                           class="bg-gray-50 border border-gray-300 rounded-lg p-2 w-full focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100">{{$authDescription}}</textarea>
+                            </td>
+                            <td class="px-4 py-2">
+                                @php
+                                    $accountType = is_object($user) ? ($user->accountType ?? 'internal') : ($user['accountType'] ?? 'internal');
+                                @endphp
+                                <select name="userAccountType{{$userId}}" disabled
+                                        class="bg-gray-50 border border-gray-300 rounded-lg p-2 w-full focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100">
+                                    <option value="internal" {{ $accountType === 'internal' ? 'selected' : '' }}>内部</option>
+                                    <option value="external" {{ $accountType === 'external' ? 'selected' : '' }}>外部</option>
+                                </select>
                             </td>
                         </tr>
                         @endforeach
@@ -458,6 +469,7 @@ function createUserRow(user, rowNumber, teamList) {
     const validTo = user.validTo ? user.validTo.substring(0, 10) : '';
     const description = user.description || '';
     const authDescription = user.authDescription || '';
+    const accountType = user.accountType || 'internal';
     
     // チームセレクトボックスの生成
     let teamOptions = '';
@@ -513,6 +525,13 @@ function createUserRow(user, rowNumber, teamList) {
         <td class="px-4 py-2">
             <textarea name="userAuthDescription${userId}" rows="1" disabled
                       class="bg-gray-50 border border-gray-300 rounded-lg p-2 w-full focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100">${authDescription}</textarea>
+        </td>
+        <td class="px-4 py-2">
+            <select name="userAccountType${userId}" disabled
+                    class="bg-gray-50 border border-gray-300 rounded-lg p-2 w-full focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100">
+                <option value="internal" ${accountType === 'internal' ? 'selected' : ''}>内部</option>
+                <option value="external" ${accountType === 'external' ? 'selected' : ''}>外部</option>
+            </select>
         </td>
     `;
     

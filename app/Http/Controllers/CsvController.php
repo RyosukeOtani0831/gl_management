@@ -19,6 +19,7 @@ class CsvController extends Controller
         'validFrom',
         'validTo',
         'description',
+        'accountType',
     ];
     const CSV_USER_EDIT_HEADER = ['authDescription','medilineID','deleteFlag',];
     const CSV_USER_DEL_HEADER = ['delete', 'displayName', 'kana', 'emailAddress'];
@@ -95,6 +96,7 @@ class CsvController extends Controller
                 'validFrom' => $this->convertDateToTimestamp($user['validFrom'] ?? null),
                 'validTo' => $this->convertDateToTimestamp($user['validTo'] ?? null),
                 'description' => $user['description'],
+                'accountType' => $user['accountType'] ?? 'internal',
             ];
             MedilineAPIController::postCreateUser($data);
         });
@@ -147,6 +149,7 @@ class CsvController extends Controller
                     'validFrom' => $this->convertDateToTimestamp($user['validFrom'] ?? null),
                     'validTo' => $this->convertDateToTimestamp($user['validTo'] ?? null),
                     'description' => $user['description'],
+                    'accountType' => $user['accountType'] ?? 'internal',
                     // 'authDescription' => $user['authDescription'],
                 ];
     

@@ -484,6 +484,7 @@ class MainController extends Controller
             'validFrom' => $request['validFrom'],
             'validTo' => $request['validTo'],
             'description' => $request->description,
+            'accountType' => $request->accountType ?? 'internal',
         ];
     }
 

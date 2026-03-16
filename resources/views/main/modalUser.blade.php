@@ -81,6 +81,14 @@ function openUserModal(type) {
                         <input type="date" name="validTo"
                                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
                     </div>
+                    <div>
+                        <label for="accountType" class="block text-gray-700 text-sm font-bold mb-2">アカウント種別:</label>
+                        <select name="accountType" required
+                                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                            <option value="internal">内部</option>
+                            <option value="external">外部</option>
+                        </select>
+                    </div>
                 </div>
             `;
             formAction = "{{ action('MainController@createUser') }}";
@@ -270,6 +278,8 @@ function editUserList(e){
             userInfo.validTo = document.getElementsByName("userValidTo" + userId)[0].value;
             userInfo.description = document.getElementsByName("userDescription" + userId)[0].value;
             userInfo.authDescription = document.getElementsByName("userAuthDescription" + userId)[0].value;
+            const accountTypeEl = document.getElementsByName("userAccountType" + userId)[0];
+            userInfo.accountType = accountTypeEl ? accountTypeEl.value : "internal";
             
             usersInfo.push(userInfo);
         }
