@@ -81,7 +81,7 @@
                             @endif
                         </td>
                         <td class="px-6 py-4 text-gray-500">
-                            @if($OitaInfo['isOita'])
+                            @if($groupPermissionInfo['hideGroupPermission'])
                                 <span class="bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs font-medium">
                                     <i class="fa fa-users mr-1"></i> {{ $memberCount }}
                                 </span>
@@ -185,7 +185,7 @@
                     <span id="selected-count" class="text-sm text-gray-500 whitespace-nowrap">0件選択</span>
                 </div>
                 <div class="flex gap-2 mt-3">
-                    @if($OitaInfo['isOita'])
+                    @if($groupPermissionInfo['hideGroupPermission'])
                         <button onclick="addSelectedUsers(false)" 
                                 class="flex-1 text-sm px-3 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition">
                             <i class="fa fa-user-plus mr-1"></i> 追加
@@ -330,7 +330,7 @@ function loadGroupMembers(groupId) {
 // メンバーリストを描画
 function renderMembers() {
     const listEl = document.getElementById('drawer-members-list');
-    const isOita = {{ $OitaInfo['isOita'] ? 'true' : 'false' }};
+    const hideGroupPermission = {{ $groupPermissionInfo['hideGroupPermission'] ? 'true' : 'false' }};
     
     if (currentMembers.length === 0) {
         listEl.innerHTML = `
@@ -347,8 +347,8 @@ function renderMembers() {
             ? '<span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-medium"><i class="fa fa-user-shield mr-1"></i>管理者</span>'
             : '<span class="bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs font-medium"><i class="fa fa-user mr-1"></i>メンバー</span>';
         
-        // isOita時は権限変更ボタンを非表示
-        const roleToggle = (isEditMode && !isOita) ? `
+        // hideGroupPermission時は権限変更ボタンを非表示
+        const roleToggle = (isEditMode && !hideGroupPermission) ? `
             <button onclick="toggleMemberRole(${member.id}); event.stopPropagation();" 
                     class="text-xs px-2 py-1 rounded border border-gray-300 hover:bg-gray-100 transition mr-2">
                 権限変更
@@ -362,8 +362,8 @@ function renderMembers() {
             </button>
         ` : '';
         
-        // isOita時は管理者バッジを非表示
-        const badgeDisplay = isOita ? '' : adminBadge;
+        // hideGroupPermission時は管理者バッジを非表示
+        const badgeDisplay = hideGroupPermission ? '' : adminBadge;
         
         html += `
             <div class="px-6 py-3 hover:bg-blue-50 flex items-center justify-between transition-colors">

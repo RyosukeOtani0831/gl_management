@@ -13,12 +13,21 @@ use Illuminate\Support\Facades\DB;
 class MainController extends Controller
 {
     /**
-     * ログイン者の所属ワークプレイスが大分県立病院であるか判定
+     * グループ権限UIを非表示にするか（外来Lawでは常にtrue）
      * @return bool
      */
-    public static function isOita()
+    public static function hideGroupPermission()
     {
-        return session('workplaceId') === config('constants.oita_workplace_id');
+        return true;
+    }
+
+    /**
+     * 大分式仮登録フローを使うか（外来Lawでは常にfalse）
+     * @return bool
+     */
+    public static function useProvisionalFlow()
+    {
+        return false;
     }
 
     public function setHash(Request $request)
@@ -149,7 +158,6 @@ class MainController extends Controller
             \Log::warning('Message count not found for group ID ' . $groupId);
             return 0;
         } catch (\Exception $e) {
-            // グループが削除済み等でエラーになる場合は0を返す
             \Log::warning('Failed to get message count for group ID ' . $groupId, [
                 'error' => $e->getMessage()
             ]);
@@ -165,11 +173,9 @@ class MainController extends Controller
     {
         $data = [];
 
-        // APIからデータを取得
         $teamList = self::fetchApiData([MedilineAPIController::class, 'getTeamList'], 'list');
         $groupList = self::fetchApiData([MedilineAPIController::class, 'getGroupList'], 'list');
         
-        // ユーザーリスト：ユーザーページ用（最初の2ページ分=100件）
         $response1 = MedilineAPIController::getUserList(session('workplaceId'), 1, false);
         $response2 = MedilineAPIController::getUserList(session('workplaceId'), 2, false);
         $userList1 = $response1['data']['list'] ?? [];
@@ -178,7 +184,6 @@ class MainController extends Controller
         $userList = self::addUserInfoAuthComment($userList);
         $userList = self::sortUserList($userList);
         
-        // ユーザーリスト：グループページ用（全件）
         $responseAll = MedilineAPIController::getUserList(session('workplaceId'), 1, true);
         $userListForGroupPage = $responseAll['data']['list'] ?? [];
         $userListForGroupPage = self::addUserInfoAuthComment($userListForGroupPage);
@@ -186,18 +191,17 @@ class MainController extends Controller
         
         $userTempList = MySQLController::SelectUserAll();
 
-        // 大分県立病院関連情報
-        $OitaInfo = ['isOita' => self::isOita(), 'teamId' => config('constants.oita_team_id')];
+        $groupPermissionInfo = ['hideGroupPermission' => self::hideGroupPermission()];
 
         $csvUserHeaders = array_merge(CsvController::CSV_USER_HEADER, CsvController::CSV_USER_EDIT_HEADER);
 
         $data = [
             'teamList' => $teamList,
             'groupList' => self::addGroupInfoMessageCount($groupList),
-            'userList' => $userList,  // 100件（50×2）
+            'userList' => $userList,
             'userListAll' => $userListForGroupPage,
             'userTempList' => $userTempList,
-            'OitaInfo' => $OitaInfo,
+            'groupPermissionInfo' => $groupPermissionInfo,
             'loginUserId' => session('userId'),
             'csvUserHeaders' => $csvUserHeaders,
         ];
@@ -245,7 +249,7 @@ class MainController extends Controller
     {
         $data = [
             'name' => $request->name,
-            'public' => (int)$request->public,  // intにキャスト
+            'public' => (int)$request->public,
         ];
 
         $res = MedilineAPIController::postCreateGroup($data);
@@ -255,15 +259,6 @@ class MainController extends Controller
             'groupId' => $groupId,
             'teamId' => $request->teamId
         ]);
-
-        // 大分病院で公開グループが作られた時に配信用アカウントを強制参加
-        if ((int)$request->public === 1 && (int)$request->teamId == config('constants.oita_team_id')) {
-            MedilineAPIController::updateGroupMember([
-                'id' => $groupId,
-                'usersIds' => [config('constants.oita_delivery_user_id')],
-                'admin' => true,
-            ]);
-        }
 
         session(['current_hash' => 'group']);
         return redirect()->route('main');
@@ -285,7 +280,6 @@ class MainController extends Controller
         $userIds = explode(",", $request->userIds);
 
         foreach ($userIds as $userId) {
-            // self::deleteUserById($userId);
             DeleteUserJob::dispatch($userId, session('workplaceId'));
         }
 
@@ -338,32 +332,21 @@ class MainController extends Controller
     // グループ編集
     public static function editGroup(Request $request)
     {
-        // デバッグ：送信されたデータを確認
         \Log::info('editGroup request data:', [
             'groupAdminsInfo_raw' => $request->input('groupAdminsInfo'),
             'groupsInfo_raw' => $request->input('groupsInfo')
         ]);
         
-        // 先に管理者権限を付与（admin=true）
         if ($request->has('groupAdminsInfo')) {
             $groupAdmins = json_decode($request->groupAdminsInfo);
-            
-            \Log::info('Decoded groupAdmins:', [
-                'groupAdmins' => $groupAdmins
-            ]);
-            
+            \Log::info('Decoded groupAdmins:', ['groupAdmins' => $groupAdmins]);
             self::editGroupMaster($groupAdmins, true);
         }
         
-        // 後から一般メンバーを追加（admin=false）
         if ($request->has('groupsInfo')) {
             $groups = json_decode($request->groupsInfo);
+            \Log::info('Decoded groups (before filtering):', ['groups' => $groups]);
             
-            \Log::info('Decoded groups (before filtering):', [
-                'groups' => $groups
-            ]);
-            
-            // 管理者IDを取得
             $adminIds = [];
             if ($request->has('groupAdminsInfo')) {
                 $groupAdmins = json_decode($request->groupAdminsInfo);
@@ -374,17 +357,12 @@ class MainController extends Controller
                 }
             }
             
-            \Log::info('Admin IDs extracted:', [
-                'adminIds' => $adminIds
-            ]);
+            \Log::info('Admin IDs extracted:', ['adminIds' => $adminIds]);
             
-            // 一般メンバーのみを抽出（管理者を除外）
             foreach ($groups as $group) {
                 if (isset($group->usersIds)) {
                     $originalUsers = $group->usersIds;
-                    // 管理者を除外した一般メンバーのみ
                     $group->usersIds = array_values(array_diff($group->usersIds, $adminIds));
-                    
                     \Log::info('Filtered group users:', [
                         'groupId' => $group->id,
                         'original' => $originalUsers,
@@ -393,7 +371,6 @@ class MainController extends Controller
                 }
             }
             
-            // 一般メンバーがいる場合のみ処理
             if (!empty($groups[0]->usersIds)) {
                 self::editGroupMaster($groups, false);
             }
@@ -497,7 +474,6 @@ class MainController extends Controller
 
     // --- ヘルパー関数 ---
     
-    // ユーザー情報の準備
     private static function prepareUserData($request)
     {
         return [
@@ -511,21 +487,18 @@ class MainController extends Controller
         ];
     }
 
-    // グループ削除処理
     private static function deleteGroupById($groupId)
     {
         $data = ['id' => $groupId];
         MedilineAPIController::deleteGroup($data);
     }
 
-    // チーム削除処理
     private static function deleteTeamById($teamId)
     {
         $data = ['id' => $teamId];
         MedilineAPIController::deleteTeam($data);
     }
 
-    // ユーザー情報更新
     private static function updateUser($user)
     {
         $data = [
@@ -541,7 +514,6 @@ class MainController extends Controller
         MedilineAPIController::updateUser($data);
     }
 
-    // ユーザーのコメント（authComment）の更新
     private static function updateAuthComment($user)
     {
         if (isset($user->authDescription)) {
@@ -557,7 +529,6 @@ class MainController extends Controller
         }
     }
 
-    // ユーザー一時情報更新
     private static function updateUserTemp($user)
     {
         $data = [
@@ -574,17 +545,12 @@ class MainController extends Controller
 
     /**
      * グループ情報の更新・削除処理（管理者権限に応じた処理分岐）
-     * 
-     * @param array $groups 変更対象のグループ情報
-     * @param bool $admin 管理者権限フラグ
      */
     private static function editGroupMaster($groups, $admin)
     {
-        // 現在のグループ情報を取得
         $getApiGroupList = MedilineAPIController::getGroupList();
         $groupList = $getApiGroupList['data']['list'] ?? [];
 
-        // グループのユーザーIDと管理者IDを格納
         foreach ($groupList as $i => $group) {
             $allUserIds = [];
             $adminUserIds = [];
@@ -593,18 +559,15 @@ class MainController extends Controller
                 $userId = $groupUser['userId'];
                 $allUserIds[] = $userId;
                 
-                // 管理者フラグをチェック
                 if ($groupUser['isAdmin']) {
                     $adminUserIds[] = $userId;
                 }
             }
             
-            // 重複を削除してインデックスを振り直す
             $groupList[$i]['usersIds'] = array_values(array_unique($allUserIds));
             $groupList[$i]['adminUserIds'] = array_values(array_unique($adminUserIds));
         }
 
-        // 変更対象グループを順次確認
         foreach ($groups as $group) {
             $existingGroup = collect($groupList)->firstWhere('id', $group->id);
 
@@ -612,36 +575,23 @@ class MainController extends Controller
                 continue;
             }
 
-            // グループ情報の更新処理
             self::updateGroupIfChanged($group, $existingGroup);
-
-            // グループメンバーの更新処理
             self::updateGroupMembersIfChanged($group, $existingGroup, $admin);
         }
     }
 
-    /**
-     * グループ情報が変更された場合に更新を行う
-     * 
-     * @param object $group 更新対象のグループ情報
-     * @param array $existingGroup 現在のグループ情報
-     */
     private static function updateGroupIfChanged($group, $existingGroup)
     {
-        // avatarFileId の安全な取得
         $groupAvatarFileId = $group->avatarFileId ?? null;
         $existingAvatarFileId = $existingGroup['avatarFileId'] ?? null;
         
-        // teamId の取得（型を統一）
         $newTeamId = isset($group->teamId) ? (int)$group->teamId : null;
         
-        // 既存のteamIdを取得（teams配列から）
         $existingTeamId = null;
         if (isset($existingGroup['teams']) && !empty($existingGroup['teams'])) {
             $existingTeamId = (int)$existingGroup['teams'][0]['id'];
         }
         
-        // デバッグログ
         \Log::info('Group update debug:', [
             'group_id' => $group->id,
             'new_teamId' => $newTeamId,
@@ -649,7 +599,6 @@ class MainController extends Controller
             'comparison' => $newTeamId != $existingTeamId ? 'DIFFERENT' : 'SAME'
         ]);
 
-        // 変更チェック
         if (
             ($existingGroup['public'] ?? null) != $group->public ||
             ($existingGroup['name'] ?? null) != $group->name ||
@@ -669,7 +618,6 @@ class MainController extends Controller
             MedilineAPIController::updateGroup($data);
         }
 
-        // チーム変更があれば更新
         if ($newTeamId !== null && $newTeamId !== $existingTeamId) {
             \Log::info('Updating group team:', [
                 'groupId' => $group->id,
@@ -678,7 +626,6 @@ class MainController extends Controller
             ]);
             
             try {
-                // 古いチームから削除
                 if ($existingTeamId !== null) {
                     MedilineAPIController::removeGroupFromTeam([
                         'groupId' => $group->id,
@@ -686,7 +633,6 @@ class MainController extends Controller
                     ]);
                 }
                 
-                // 新しいチームに追加
                 MedilineAPIController::putGroupToTeam([
                     'groupId' => $group->id,
                     'teamId' => $newTeamId
@@ -701,22 +647,13 @@ class MainController extends Controller
         }
     }
 
-    /**
-     * グループメンバーの更新処理（権限変更対応版）
-     * 
-     * @param object $group 更新対象のグループ情報
-     * @param array $existingGroup 現在のグループ情報
-     * @param bool $admin 管理者権限フラグ
-     */
     private static function updateGroupMembersIfChanged($group, $existingGroup, $admin)
     {
-        // usersIds の安全な取得
         $newUsersIds = $group->usersIds ?? [];
         if (!is_array($newUsersIds)) {
             $newUsersIds = [];
         }
         
-        // 既存のユーザーIDリストを取得
         $existingUsersIds = $existingGroup['usersIds'] ?? [];
         $existingAdminIds = $existingGroup['adminUserIds'] ?? [];
         
@@ -729,18 +666,11 @@ class MainController extends Controller
         ]);
         
         if ($admin) {
-            // === 管理者リストの処理 ===
-            
-            // 新規に管理者として追加するユーザー（既存メンバーではない）
             $newAdminsToAdd = array_diff($newUsersIds, $existingUsersIds);
-            
-            // 一般メンバーから管理者に昇格するユーザー
             $membersToPromote = array_diff(
-                array_intersect($newUsersIds, $existingUsersIds), // 既存メンバーで新規管理者リストにいる
-                $existingAdminIds  // 既存の管理者を除外
+                array_intersect($newUsersIds, $existingUsersIds),
+                $existingAdminIds
             );
-            
-            // 管理者から降格するユーザー（既存管理者で新規管理者リストにいない）
             $adminsToDemote = array_diff($existingAdminIds, $newUsersIds);
             
             \Log::info('Admin processing:', [
@@ -749,7 +679,6 @@ class MainController extends Controller
                 'adminsToDemote' => $adminsToDemote
             ]);
             
-            // 1. 新規管理者を追加
             if (!empty($newAdminsToAdd)) {
                 \Log::info('Adding new admins:', ['userIds' => $newAdminsToAdd]);
                 MedilineAPIController::updateGroupMember([
@@ -759,7 +688,6 @@ class MainController extends Controller
                 ]);
             }
             
-            // 2. 一般メンバーを管理者に昇格
             foreach ($membersToPromote as $userId) {
                 \Log::info('Promoting member to admin:', ['userId' => $userId]);
                 MedilineAPIController::deleteGroupMember([
@@ -773,7 +701,6 @@ class MainController extends Controller
                 ]);
             }
             
-            // 3. 管理者を一般メンバーに降格（後で一般メンバー処理で追加される）
             foreach ($adminsToDemote as $userId) {
                 \Log::info('Demoting admin to member:', ['userId' => $userId]);
                 MedilineAPIController::deleteGroupMember([
@@ -783,19 +710,10 @@ class MainController extends Controller
             }
             
         } else {
-            // === 一般メンバーリストの処理 ===
-            
-            // 新規に一般メンバーとして追加するユーザー（既存メンバーではない + 管理者から降格したユーザー）
             $newMembersToAdd = array_diff($newUsersIds, $existingUsersIds);
-            
-            // 管理者から降格したユーザーを一般メンバーとして追加
             $demotedAdmins = array_intersect($newUsersIds, $existingAdminIds);
-            $demotedAdmins = array_diff($demotedAdmins, $existingUsersIds); // 既に処理済みを除外... これは不要かも
-            
-            // 実際には降格したユーザーは既にdeleteされているので、単純に追加リストに含まれているか確認
+            $demotedAdmins = array_diff($demotedAdmins, $existingUsersIds);
             $allToAdd = array_diff($newUsersIds, array_diff($existingUsersIds, $existingAdminIds));
-            
-            // 削除するメンバー（既存の一般メンバーで新規リストにいない）
             $existingMembers = array_diff($existingUsersIds, $existingAdminIds);
             $membersToRemove = array_diff($existingMembers, $newUsersIds);
             
@@ -804,7 +722,6 @@ class MainController extends Controller
                 'membersToRemove' => $membersToRemove
             ]);
             
-            // 1. 新規メンバーを追加
             if (!empty($newMembersToAdd)) {
                 \Log::info('Adding new members:', ['userIds' => $newMembersToAdd]);
                 MedilineAPIController::updateGroupMember([
@@ -814,7 +731,6 @@ class MainController extends Controller
                 ]);
             }
             
-            // 2. メンバーを削除
             foreach ($membersToRemove as $userId) {
                 \Log::info('Removing member:', ['userId' => $userId]);
                 MedilineAPIController::deleteGroupMember([
@@ -829,7 +745,6 @@ class MainController extends Controller
     {
         $page = $request->query('page', 1);
         
-        // 初回のみ2ページ分取得（スクロールバーを確実に出すため）
         if ($page == 1) {
             $response1 = MedilineAPIController::getUserList(session('workplaceId'), 1);
             $response2 = MedilineAPIController::getUserList(session('workplaceId'), 2);
@@ -844,12 +759,11 @@ class MainController extends Controller
             return response()->json([
                 'users' => $userList,
                 'hasMore' => count($userList2) >= ($response2['data']['limit'] ?? 0),
-                'nextPage' => 3, // 次は3ページ目
+                'nextPage' => 3,
                 'total' => $response1['data']['count'] ?? 0
             ]);
         }
         
-        // 2ページ目以降は通常通り
         $response = MedilineAPIController::getUserList(session('workplaceId'), $page);
         $userList = $response['data']['list'] ?? [];
         $userList = self::addUserInfoAuthComment($userList);
@@ -865,84 +779,61 @@ class MainController extends Controller
 
     public function getGroupContent()
     {
-        // グループページに必要なデータを取得
         $data = $this->getGroupPageData();
-        
-        // groupList.blade.php をレンダリングして返す
         return view('main/groupList', $data)->render();
     }
 
     public function getGroupAdminContent()
     {
-        // グループ管理者ページに必要なデータを取得
         $data = $this->getGroupPageData();
-        
-        // groupAdminList.blade.php をレンダリングして返す
         return view('main/groupAdminList', $data)->render();
     }
 
-    /**
-     * グループページに必要なデータを取得
-     * @return array
-     */
     private function getGroupPageData()
     {
         try {
-            // チームリスト取得
             $teamList = self::fetchApiData([MedilineAPIController::class, 'getTeamList']);
-            
-            // グループリスト取得
             $groupList = self::fetchApiData([MedilineAPIController::class, 'getGroupList']);
             $groupList = self::addGroupInfoMessageCount($groupList);
             
-            // 全ユーザーリスト取得（グループページ用）
             try {
                 $responseAll = MedilineAPIController::getUserList(session('workplaceId'), 1, true);
                 $userListAll = $responseAll['data']['list'] ?? [];
                 $userListAll = self::addUserInfoAuthComment($userListAll);
                 $userListAll = self::sortUserList($userListAll);
             } catch (\Exception $e) {
-                // ユーザーリスト取得失敗時は空配列
                 \Log::error('Failed to fetch all users for group page: ' . $e->getMessage());
                 $userListAll = [];
             }
             
-            // 大分県立病院関連情報
-            $OitaInfo = ['isOita' => self::isOita(), 'teamId' => config('constants.oita_team_id')];
+            $groupPermissionInfo = ['hideGroupPermission' => self::hideGroupPermission()];
             
             return [
                 'teamList' => $teamList,
                 'groupList' => $groupList,
                 'userListAll' => $userListAll,
-                'OitaInfo' => $OitaInfo,
+                'groupPermissionInfo' => $groupPermissionInfo,
                 'loginUserId' => session('userId'),
             ];
         } catch (\Exception $e) {
             \Log::error('Failed to get group page data: ' . $e->getMessage());
             
-            // エラー時は最低限のデータを返す
             return [
                 'teamList' => [],
                 'groupList' => [],
                 'userListAll' => [],
-                'OitaInfo' => ['isOita' => self::isOita(), 'teamId' => config('constants.oita_team_id')],
+                'groupPermissionInfo' => ['hideGroupPermission' => self::hideGroupPermission()],
                 'loginUserId' => session('userId'),
             ];
         }
     }
 
-    /**
-     * 特定グループのメンバー情報を取得（管理者フラグ付き）
-     */
     public function getGroupAdminMembers($groupId)
     {
         try {
             MedilineAPIController::auth();
             
-            // groupIdをintに変換
             $groupId = (int)$groupId;
-            
-            // グループリスト取得
             $groupList = MedilineAPIController::getGroupList(session('workplaceId'))['data']['list'];
             $group = collect($groupList)->firstWhere('id', $groupId);
             
@@ -950,13 +841,11 @@ class MainController extends Controller
                 return response()->json(['error' => 'Group not found'], 404);
             }
             
-            // デバッグ：グループ情報全体を出力
             \Log::info('Group structure:', [
                 'groupId' => $groupId,
                 'group_users' => $group['users']
             ]);
             
-            // メンバー情報を整理
             $memberData = [];
             foreach ($group['users'] as $groupUser) {
                 \Log::info('Processing group user:', [
@@ -966,17 +855,15 @@ class MainController extends Controller
                 ]);
                 
                 $memberData[$groupUser['userId']] = [
-                    'isAdmin' => (bool)$groupUser['isAdmin']  // 明示的にboolにキャスト
+                    'isAdmin' => (bool)$groupUser['isAdmin']
                 ];
             }
             
             \Log::info('MemberData:', $memberData);
             
-            // 全ユーザーリスト取得
             $responseAll = MedilineAPIController::getUserList(session('workplaceId'), 1, true);
             $userListAll = $responseAll['data']['list'] ?? [];
             
-            // グループのメンバーをフィルタして、管理者フラグを追加
             $members = [];
             foreach ($userListAll as $user) {
                 if (isset($memberData[$user['id']])) {

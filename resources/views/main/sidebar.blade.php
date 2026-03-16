@@ -11,7 +11,7 @@
         <i class="fas fa-user mr-2"></i>User List
     </a>
     
-    @if($OitaInfo['isOita'])
+    @if($groupPermissionInfo['hideGroupPermission'])
         <a href="#userTemp" class="nav-link py-2 px-4 rounded hover:bg-green-600 transition flex items-center">
             <i class="fas fa-user-clock mr-2"></i>User Temp List
         </a>

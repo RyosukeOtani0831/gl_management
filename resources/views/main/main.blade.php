@@ -50,7 +50,7 @@
             <div class="tab-content">
                 @include('main/teamList')
                 
-                @if(!$OitaInfo['isOita'])
+                @if(!$groupPermissionInfo['hideGroupPermission'])
                     {{-- @include('main/groupAdminList') --}}
                     <!-- 代わりにプレースホルダー -->
                     <div id="groupAdmin" class="tab-pane hidden">
@@ -66,7 +66,7 @@
 
                 @include('main/userList')
 
-                @if($OitaInfo['isOita'])
+                @if($groupPermissionInfo['useProvisionalFlow'])
                     @include('main/userTempList')
                 @endif
                 
