@@ -916,6 +916,44 @@ class MedilineAPIController extends Controller
     }
 
     /**
+     * ケースのクローズ状態を更新
+     */
+    public static function updateGroupClose($groupId, $isClosed)
+    {
+        self::sessionCheck();
+        $adminToken = session('adminToken');
+
+        try {
+            $client = new Client();
+            $room = self::getGroupDetail($groupId)['data']['group'];
+
+            $response = $client->put(self::baseUrl() . "/api/management/groups/{$groupId}", [
+                'json' => [
+                    'name' => $room['name'],
+                    'avatarFileId' => $room['avatarFileId'] ?? 0,
+                    'public' => $room['public'] ?? false,
+                    'isClosed' => $isClosed,
+                ],
+                'headers' => [
+                    'Content-Type' => 'application/json',
+                    'Adminaccesstoken' => $adminToken,
+                ],
+            ]);
+
+            $data = json_decode($response->getBody(), true);
+
+            if ($data['status'] === 'error') {
+                throw new \Exception($data['message']);
+            }
+
+            return $data;
+        } catch (\Exception $e) {
+            report($e);
+            throw new RedirectExceptions(route('main'), $e->getMessage());
+        }
+    }
+
+    /**
      * キュー用：adminTokenを直接取得して返す
      */
     public static function getAdminToken()

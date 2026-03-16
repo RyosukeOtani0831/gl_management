@@ -58,6 +58,7 @@ Route::group(['middleware' => 'basicauth'], function() {
 
     Route::post('/save-hash', [HashController::class, 'save']);
     Route::post('/set-hash', 'MainController@setHash')->name('setHash');
+    Route::post('/group/close', 'MainController@updateGroupClose')->name('updateGroupClose');
 
     Route::get('/api/group/{groupId}/admin-members', 'MainController@getGroupAdminMembers')
         ->name('getGroupAdminMembers');

@@ -26,7 +26,7 @@
                     <th class="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase">#</th>
                     <th class="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase">Group Name</th>
                     <th class="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase">Team</th>
-                    <th class="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase">Public</th>
+                    <th class="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase">ステータス</th>
                     <th class="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase">メンバー</th>
                     <th class="px-6 py-3 text-right"></th>
                 </tr>
@@ -65,7 +65,7 @@
                         }
                     @endphp
                     <tr class="group hover:bg-blue-50 cursor-pointer transition-colors duration-150" 
-                        onclick="openDrawer({{ $group['id'] }}, '{{ addslashes($group['name']) }}', {{ $group['public'] ? 'true' : 'false' }}, '{{ addslashes($group['avatarFileId'] ?? '') }}', {{ $teamId ?? 'null' }})">
+                        onclick="openDrawer({{ $group['id'] }}, '{{ addslashes($group['name']) }}', {{ $group['public'] ? 'true' : 'false' }}, '{{ addslashes($group['avatarFileId'] ?? '') }}', {{ $teamId ?? 'null' }}, {{ !empty($group['isClosed']) ? 'true' : 'false' }})">
                         <td class="px-6 py-4 text-gray-600">{{ $i + 1 }}</td>
                         <td class="px-6 py-4 font-medium text-gray-900 group-hover:text-blue-700">
                             {{ $group['name'] }}
@@ -73,7 +73,13 @@
                         <td class="px-6 py-4 text-gray-600">
                             {{ $teamName ?: '-' }}
                         </td>
-                        {{-- 公開/非公開は外来Lawでは強制非公開のため非表示 --}}
+                        <td class="px-6 py-4">
+                            @if(!empty($group['isClosed']))
+                                <span class="bg-red-100 text-red-800 px-2 py-1 rounded text-xs font-medium">クローズ</span>
+                            @else
+                                <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-medium">オープン</span>
+                            @endif
+                        </td>
                         <td class="px-6 py-4 text-gray-500">
                             @if($groupPermissionInfo['hideGroupPermission'])
                                 <span class="bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs font-medium">
@@ -128,6 +134,12 @@
                 </div>
                 {{-- 公開/非公開は外来Lawでは強制非公開のため非表示 --}}
                 <input type="hidden" id="drawer-group-public" value="0">
+                <div>
+                    <label class="block text-xs text-gray-500 mb-1">ステータス</label>
+                    <button type="button" id="drawer-group-close-btn" onclick="toggleCaseClose()"
+                            class="px-3 py-1 rounded text-sm font-medium transition">
+                    </button>
+                </div>
             </div>
         </div>
         <button onclick="closeDrawer()" 
@@ -227,8 +239,36 @@ function reloadGroup() {
     }, 100);
 }
 
+// クローズボタンの表示を更新
+function updateCloseBtn(isClosed) {
+    const btn = document.getElementById('drawer-group-close-btn');
+    if (!btn) return;
+    if (isClosed) {
+        btn.textContent = 'オープンに戻す';
+        btn.className = 'px-3 py-1 rounded text-sm font-medium transition bg-green-100 text-green-800 hover:bg-green-200';
+    } else {
+        btn.textContent = 'クローズする';
+        btn.className = 'px-3 py-1 rounded text-sm font-medium transition bg-red-100 text-red-800 hover:bg-red-200';
+    }
+}
+
+// クローズ状態をトグル
+function toggleCaseClose() {
+    const newIsClosed = !currentGroupData.isClosed;
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '/group/close';
+    form.innerHTML = `
+        <input type="hidden" name="_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="groupId" value="${currentGroupId}">
+        <input type="hidden" name="isClosed" value="${newIsClosed ? 1 : 0}">
+    `;
+    document.body.appendChild(form);
+    form.submit();
+}
+
 // ドロワーを開く
-function openDrawer(groupId, groupName, isPublic, avatarFileId, teamId) {
+function openDrawer(groupId, groupName, isPublic, avatarFileId, teamId, isClosed) {
     currentGroupId = groupId;
     isEditMode = false;
     selectedUserIds = [];
@@ -246,8 +286,11 @@ function openDrawer(groupId, groupName, isPublic, avatarFileId, teamId) {
         name: groupName,
         public: isPublic,
         avatarFileId: avatarFileId,
-        teamId: teamId
+        teamId: teamId,
+        isClosed: isClosed
     };
+    // クローズボタンの表示更新
+    updateCloseBtn(isClosed);
     
     // 編集モードをリセット
     document.getElementById('drawer-view-mode').style.display = 'flex';

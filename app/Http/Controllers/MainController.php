@@ -742,6 +742,18 @@ class MainController extends Controller
         }
     }
 
+    // ケースのクローズ状態を更新
+    public function updateGroupClose(Request $request)
+    {
+        $groupId = $request->groupId;
+        $isClosed = (bool)$request->isClosed;
+
+        MedilineAPIController::updateGroupClose($groupId, $isClosed);
+
+        session(['current_hash' => 'group']);
+        return redirect()->route('main');
+    }
+
     public function getUsersPaginated(Request $request)
     {
         $page = $request->query('page', 1);
