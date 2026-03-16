@@ -73,13 +73,7 @@
                         <td class="px-6 py-4 text-gray-600">
                             {{ $teamName ?: '-' }}
                         </td>
-                        <td class="px-6 py-4">
-                            @if($group['public'])
-                                <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-medium">公開</span>
-                            @else
-                                <span class="bg-gray-100 text-gray-800 px-2 py-1 rounded text-xs font-medium">非公開</span>
-                            @endif
-                        </td>
+                        {{-- 公開/非公開は外来Lawでは強制非公開のため非表示 --}}
                         <td class="px-6 py-4 text-gray-500">
                             @if($groupPermissionInfo['hideGroupPermission'])
                                 <span class="bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs font-medium">
@@ -132,11 +126,8 @@
                         @endforeach
                     </select>
                 </div>
-                <label class="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" id="drawer-group-public" disabled
-                           class="w-4 h-4 text-green-600 rounded focus:ring-green-500">
-                    <span class="text-sm text-gray-600">公開ケース</span>
-                </label>
+                {{-- 公開/非公開は外来Lawでは強制非公開のため非表示 --}}
+                <input type="hidden" id="drawer-group-public" value="0">
             </div>
         </div>
         <button onclick="closeDrawer()" 
@@ -244,7 +235,6 @@ function openDrawer(groupId, groupName, isPublic, avatarFileId, teamId) {
     
     // 基本情報をセット
     document.getElementById('drawer-group-name').value = groupName;
-    document.getElementById('drawer-group-public').checked = isPublic;
     if (teamId !== null) {
         document.getElementById('drawer-group-team').value = teamId;
     } else {
@@ -264,7 +254,6 @@ function openDrawer(groupId, groupName, isPublic, avatarFileId, teamId) {
     document.getElementById('drawer-edit-mode').style.display = 'none';
     document.getElementById('drawer-add-member-area').style.display = 'none';
     document.getElementById('drawer-group-name').readOnly = true;
-    document.getElementById('drawer-group-public').disabled = true;
     document.getElementById('drawer-group-team').disabled = true;
     
     // メンバーリストをローディング表示
@@ -396,7 +385,6 @@ function enableDrawerEditMode() {
     document.getElementById('drawer-edit-mode').style.display = 'flex';
     document.getElementById('drawer-add-member-area').style.display = 'block';
     document.getElementById('drawer-group-name').readOnly = false;
-    document.getElementById('drawer-group-public').disabled = false;
     document.getElementById('drawer-group-team').disabled = false;
     document.getElementById('member-search-input').value = '';
     renderMembers();
@@ -413,13 +401,11 @@ function cancelDrawerEdit() {
         document.getElementById('drawer-edit-mode').style.display = 'none';
         document.getElementById('drawer-add-member-area').style.display = 'none';
         document.getElementById('drawer-group-name').readOnly = true;
-        document.getElementById('drawer-group-public').disabled = true;
-        document.getElementById('drawer-group-team').disabled = true;
+            document.getElementById('drawer-group-team').disabled = true;
         document.getElementById('member-search-input').value = '';
         
         // データを再読み込み
         document.getElementById('drawer-group-name').value = currentGroupData.name;
-        document.getElementById('drawer-group-public').checked = currentGroupData.public;
         document.getElementById('drawer-group-team').value = currentGroupData.teamId;
         loadGroupMembers(currentGroupId);
     }
@@ -544,7 +530,7 @@ function removeMember(userId) {
 // 変更を保存
 function saveGroupChanges() {
     const groupName = document.getElementById('drawer-group-name').value;
-    const isPublic = document.getElementById('drawer-group-public').checked ? 1 : 0;
+    const isPublic = 0; // 外来Lawでは強制非公開
     const teamId = document.getElementById('drawer-group-team').value;
     
     if (!groupName.trim()) {

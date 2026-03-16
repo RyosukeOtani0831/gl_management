@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Storage;
 class CsvController extends Controller
 {
     const CSV_TEAM_HEADER = ['name'];
-    const CSV_GROUP_HEADER = ['name', 'public', 'team'];
+    const CSV_GROUP_HEADER = ['name', 'team'];
     const CSV_USER_HEADER = [
         'displayName',
         'kana',
@@ -226,10 +226,9 @@ class CsvController extends Controller
             $foundGroup = $groupList->firstWhere('name', $group['name']);
 
             if (!$foundGroup) {
-                $isPublic = ($group['public'] === '公開');
                 $res = MedilineAPIController::postCreateGroup([
                     'name' => $group['name'],
-                    'public' => $isPublic,
+                    'public' => 0, // 外来Lawでは強制非公開
                 ]);
 
                 $teamId = self::getTeamIdFromName($group['team']);
