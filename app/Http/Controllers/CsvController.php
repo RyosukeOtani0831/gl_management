@@ -99,17 +99,17 @@ class CsvController extends Controller
         ];
         $users = $this->processCsvUpload($request, 'userCsvFile', collect(self::CSV_USER_HEADER), 'users.csv');
 
-        $users->each(function ($user) {
-        $data = [
-            'displayName' => $user['displayName'],
-            'kana' => $user['kana'],
-            'emailAddress' => $user['emailAddress'],
-            'teamId' => self::getTeamIdFromName($user['teamName']),
-            'validFrom' => $this->convertDateToTimestamp($user['validFrom'] ?? null),
-            'validTo' => $this->convertDateToTimestamp($user['validTo'] ?? null),
-            'description' => $user['description'],
-            'accountType' => $accountTypeMap[$user['accountType']] ?? 'internal',
-        ];
+        $users->each(function ($user) use ($accountTypeMap) {
+            $data = [
+                'displayName' => $user['displayName'],
+                'kana' => $user['kana'],
+                'emailAddress' => $user['emailAddress'],
+                'teamId' => self::getTeamIdFromName($user['teamName']),
+                'validFrom' => $this->convertDateToTimestamp($user['validFrom'] ?? null),
+                'validTo' => $this->convertDateToTimestamp($user['validTo'] ?? null),
+                'description' => $user['description'],
+                'accountType' => $accountTypeMap[$user['accountType']] ?? null,
+            ];
             MedilineAPIController::postCreateUser($data);
         });
 
