@@ -62,6 +62,12 @@ class CsvController extends Controller
             // ファイル内容取得
             $csv = Storage::disk('local')->get('public/' . $storedFileName);
 
+            // 文字コードをUTF-8に変換
+            $encoding = mb_detect_encoding($csv, ['UTF-8', 'SJIS', 'SJIS-win', 'EUC-JP'], true);
+            if ($encoding && $encoding !== 'UTF-8') {
+                $csv = mb_convert_encoding($csv, 'UTF-8', $encoding);
+            }
+
             // 改行コードを統一して、行単位のコレクションを作成
             $data = collect(explode("\n", str_replace(["\r\n", "\r"], "\n", $csv)));
 
@@ -85,19 +91,25 @@ class CsvController extends Controller
     //
     public function importUserCsv(Request $request)
     {
+        $accountTypeMap = [
+            '内部' => 'internal',
+            '外部' => 'external',
+            'internal' => 'internal',
+            'external' => 'external',
+        ];
         $users = $this->processCsvUpload($request, 'userCsvFile', collect(self::CSV_USER_HEADER), 'users.csv');
 
         $users->each(function ($user) {
-            $data = [
-                'displayName' => $user['displayName'],
-                'kana' => $user['kana'],
-                'emailAddress' => $user['emailAddress'],
-                'teamId' => self::getTeamIdFromName($user['teamName']),
-                'validFrom' => $this->convertDateToTimestamp($user['validFrom'] ?? null),
-                'validTo' => $this->convertDateToTimestamp($user['validTo'] ?? null),
-                'description' => $user['description'],
-                'accountType' => $user['accountType'] ?? 'internal',
-            ];
+        $data = [
+            'displayName' => $user['displayName'],
+            'kana' => $user['kana'],
+            'emailAddress' => $user['emailAddress'],
+            'teamId' => self::getTeamIdFromName($user['teamName']),
+            'validFrom' => $this->convertDateToTimestamp($user['validFrom'] ?? null),
+            'validTo' => $this->convertDateToTimestamp($user['validTo'] ?? null),
+            'description' => $user['description'],
+            'accountType' => $accountTypeMap[$user['accountType']] ?? 'internal',
+        ];
             MedilineAPIController::postCreateUser($data);
         });
 
