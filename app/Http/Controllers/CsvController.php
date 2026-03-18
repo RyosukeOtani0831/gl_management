@@ -131,13 +131,21 @@ class CsvController extends Controller
         // Mediline ID で既存ユーザーを検索し、データを更新
         $users->each(function ($user) {
             // Mediline ID でユーザー情報を取得
-            $existingUser = MedilineAPIController::getUserDetail($user['gairaiLawID'])['data']['user'];
+            $existingUser = MedilineAPIController::getUserDetail($user['GairaiLawID'])['data']['user'];
     
             if (isset($existingUser['isBot']) && $existingUser['isBot'] === true) {
                 return; // BOTはスキップ
             }
 
             if ($existingUser && $existingUser['workplaceId'] == session('workplaceId')) {
+
+                $accountTypeMap = [
+                    '内部' => 'internal',
+                    '外部' => 'external',
+                    'internal' => 'internal',
+                    'external' => 'external',
+                ];
+
                 // 既存のユーザー情報
                 $existingData = [
                     'id' => $existingUser['id'],
@@ -149,11 +157,12 @@ class CsvController extends Controller
                     'validTo' => $existingUser['validTo'] ?? null,
                     'description' => $existingUser['description'] ?? '',
                     // 'authDescription' => $existingUser['authDescription'],
+                    'accountType' => $existingUser['accountType'] ?? null,
                 ];
         
                 // 新しいデータ
                 $newData = [
-                    'id' => $user['gairaiLawID'],
+                    'id' => $user['GairaiLawID'],
                     'displayName' => $user['displayName'],
                     'kana' => $user['kana'],
                     'emailAddress' => $user['emailAddress'],
@@ -161,7 +170,7 @@ class CsvController extends Controller
                     'validFrom' => $this->convertDateToTimestamp($user['validFrom'] ?? null),
                     'validTo' => $this->convertDateToTimestamp($user['validTo'] ?? null),
                     'description' => $user['description'],
-                    'accountType' => $user['accountType'] ?? 'internal',
+                    'accountType' => $accountTypeMap[$user['accountType']] ?? null, 
                     // 'authDescription' => $user['authDescription'],
                 ];
     
@@ -186,7 +195,7 @@ class CsvController extends Controller
                             
                             // 更新が失敗した場合、エラーレポート
                             if ($response['status'] !== 'success') {
-                                report(new \Exception("ユーザー更新失敗: {$user['medilineID']}"));
+                                report(new \Exception("ユーザー更新失敗: {$user['GairaiLawID']}"));
                             }
                         } catch (\Exception $e) {
                             report($e);
@@ -196,7 +205,7 @@ class CsvController extends Controller
                 }
             } else {
                 // ユーザーが見つからない、またはworkplaceIdが一致しない場合
-                report(new \Exception("ユーザーが見つかりません: {$user['medilineID']}"));
+                report(new \Exception("ユーザーが見つかりません: {$user['GairaiLawID']}"));
             }
         });
         
@@ -217,7 +226,7 @@ class CsvController extends Controller
         $users->each(function ($user) {
             if (isset($user['deleteFlag']) && $user['deleteFlag'] == 1) {
                 // 非同期で削除処理を実行
-                DeleteUserJob::dispatch($user['medilineID'], session('workplaceId'));
+                DeleteUserJob::dispatch($user['GairaiLawID'], session('workplaceId'));
             }
         });
     
