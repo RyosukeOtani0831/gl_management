@@ -16,12 +16,12 @@ class CsvController extends Controller
         'kana',
         'emailAddress',
         'teamName',
+        'accountType',
         'validFrom',
         'validTo',
         'description',
-        'accountType',
     ];
-    const CSV_USER_EDIT_HEADER = ['authDescription','medilineID','deleteFlag',];
+    const CSV_USER_EDIT_HEADER = ['authDescription','GairaiLawID','deleteFlag',];
     const CSV_USER_DEL_HEADER = ['delete', 'displayName', 'kana', 'emailAddress'];
     const CSV_USER_TEMP_HEADER = ['name', 'kana', 'password', 'team'];
     const CSV_USER_TEMP_OITA_HEADER = ['name', 'kana', 'password'];
@@ -119,7 +119,7 @@ class CsvController extends Controller
         // Mediline ID で既存ユーザーを検索し、データを更新
         $users->each(function ($user) {
             // Mediline ID でユーザー情報を取得
-            $existingUser = MedilineAPIController::getUserDetail($user['medilineID'])['data']['user'];
+            $existingUser = MedilineAPIController::getUserDetail($user['gairaiLawID'])['data']['user'];
     
             if (isset($existingUser['isBot']) && $existingUser['isBot'] === true) {
                 return; // BOTはスキップ
@@ -141,7 +141,7 @@ class CsvController extends Controller
         
                 // 新しいデータ
                 $newData = [
-                    'id' => $user['medilineID'],
+                    'id' => $user['gairaiLawID'],
                     'displayName' => $user['displayName'],
                     'kana' => $user['kana'],
                     'emailAddress' => $user['emailAddress'],
