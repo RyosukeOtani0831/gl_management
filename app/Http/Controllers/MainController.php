@@ -249,7 +249,7 @@ class MainController extends Controller
     {
         $data = [
             'name' => $request->name,
-            'public' => (int)$request->public,
+            'public' => 0,
         ];
 
         $res = MedilineAPIController::postCreateGroup($data);
