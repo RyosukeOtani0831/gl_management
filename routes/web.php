@@ -1,5 +1,6 @@
 <?php
 use Illuminate\Support\Facades\Redirect;
+use App\Http\Controllers\HashController;
 
 Route::get('/logtest', function () {
     \Log::emergency('ログテスト実行中！');
