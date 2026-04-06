@@ -763,6 +763,8 @@ class MainController extends Controller
         $userList = $response['data']['list'] ?? [];
         $userList = self::addUserInfoAuthComment($userList);
         $userList = self::sortUserList($userList);
+        $limit = $response['data']['limit'] ?? 0;
+        $hasMore = count($userList) >= $limit;
         
         if ($accountType) {
             $userList = array_values(array_filter($userList, fn($u) => ($u['accountType'] ?? 'internal') === $accountType));
@@ -770,7 +772,7 @@ class MainController extends Controller
         
         return response()->json([
             'users' => $userList,
-            'hasMore' => count($userList) >= ($response['data']['limit'] ?? 0),
+            'hasMore' => $hasMore,
             'nextPage' => $page + 1,
             'total' => $response['data']['count'] ?? 0
         ]);
