@@ -347,6 +347,7 @@ function loadGroupMembers(groupId) {
             });
             
             allUsers = data.allUsers;
+            console.log('allUsers sample:', allUsers.slice(0, 3));
             console.log('Current members after mapping:', currentMembers);
             renderMembers();
         })
@@ -545,7 +546,8 @@ function addSelectedUsers(isAdmin) {
                 displayName: user.displayName,
                 emailAddress: user.emailAddress || '',
                 kana: user.kana || '',
-                isAdmin: isAdmin
+                isAdmin: isAdmin,
+                accountType: user.accountType || 'internal'
             });
         }
     });
