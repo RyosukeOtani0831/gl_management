@@ -759,29 +759,6 @@ class MainController extends Controller
         $page = $request->query('page', 1);
         $accountType = $request->query('accountType', null);
         
-        if ($page == 1) {
-            $response1 = MedilineAPIController::getUserList(session('workplaceId'), 1);
-            $response2 = MedilineAPIController::getUserList(session('workplaceId'), 2);
-            
-            $userList1 = $response1['data']['list'] ?? [];
-            $userList2 = $response2['data']['list'] ?? [];
-            $userList = array_merge($userList1, $userList2);
-            
-            $userList = self::addUserInfoAuthComment($userList);
-            $userList = self::sortUserList($userList);
-            
-            if ($accountType) {
-                $userList = array_values(array_filter($userList, fn($u) => ($u['accountType'] ?? 'internal') === $accountType));
-            }
-            
-            return response()->json([
-                'users' => $userList,
-                'hasMore' => count($userList2) >= ($response2['data']['limit'] ?? 0),
-                'nextPage' => 3,
-                'total' => count($userList)
-            ]);
-        }
-        
         $response = MedilineAPIController::getUserList(session('workplaceId'), $page);
         $userList = $response['data']['list'] ?? [];
         $userList = self::addUserInfoAuthComment($userList);
@@ -795,7 +772,7 @@ class MainController extends Controller
             'users' => $userList,
             'hasMore' => count($userList) >= ($response['data']['limit'] ?? 0),
             'nextPage' => $page + 1,
-            'total' => count($userList)
+            'total' => $response['data']['count'] ?? 0
         ]);
     }
 
