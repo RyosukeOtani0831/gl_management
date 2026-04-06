@@ -462,6 +462,26 @@ let hasMoreUsersInternal = true;
 let hasMoreUsersExternal = true;
 
 document.addEventListener('DOMContentLoaded', function() {
+    // タブ表示時に画面が埋まっていなければ自動追加取得
+    function checkAndLoadMore(suffix) {
+        const sectionId = suffix === 'Internal' ? 'user-internal' : 'user-external';
+        const sc = document.querySelector('#' + sectionId + ' .bg-white.rounded-lg.shadow > div');
+        if (!sc) return;
+        const hasMore = suffix === 'Internal' ? hasMoreUsersInternal : hasMoreUsersExternal;
+        if (hasMore && sc.scrollHeight <= sc.clientHeight) {
+            loadMoreUsers(suffix).then(function() {
+                setTimeout(function() { checkAndLoadMore(suffix); }, 200);
+            });
+        }
+    }
+    // サイドバーのリンクをクリック時にチェック
+    document.querySelectorAll('a[href="#user-internal"], a[href="#user-external"]').forEach(function(link) {
+        link.addEventListener('click', function() {
+            const suffix = this.getAttribute('href') === '#user-internal' ? 'Internal' : 'External';
+            setTimeout(function() { checkAndLoadMore(suffix); }, 300);
+        });
+    });
+
     ['Internal', 'External'].forEach(suffix => {
         const sectionId = suffix === 'Internal' ? 'user-internal' : 'user-external';
         const scrollContainer = document.querySelector('#' + sectionId + ' .bg-white.rounded-lg.shadow > div');
