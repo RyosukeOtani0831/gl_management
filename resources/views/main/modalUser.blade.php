@@ -189,6 +189,14 @@ function openUserModal(type) {
     // モーダルのタイトルと内容を更新
     document.getElementById('userModalTitle').innerText = modalTitle;
     document.getElementById('userModalBody').innerHTML = modalBody;
+    // userAddの場合、現在のタブに応じてaccountTypeの初期値をセット
+    if (type === 'userAdd') {
+        const accountTypeSelect = document.querySelector('#userModalBody select[name="accountType"]');
+        if (accountTypeSelect) {
+            const isExternal = !document.getElementById('user-external').classList.contains('hidden');
+            accountTypeSelect.value = isExternal ? 'external' : 'internal';
+        }
+    }
     document.getElementById('modalSubmitBtn').innerText = submitText;
 
     // 送信ボタンのスタイルを動的に変更

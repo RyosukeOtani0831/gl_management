@@ -201,7 +201,7 @@ document.addEventListener("DOMContentLoaded", function() {
             });
     }
     
-    var hash = @json($hash ?? 'user');
+    var hash = @json($hash ?? 'user-internal');
     
     initializeTabs();
     
