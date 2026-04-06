@@ -757,6 +757,7 @@ class MainController extends Controller
     public function getUsersPaginated(Request $request)
     {
         $page = $request->query('page', 1);
+        $accountType = $request->query('accountType', null);
         
         if ($page == 1) {
             $response1 = MedilineAPIController::getUserList(session('workplaceId'), 1);
@@ -769,11 +770,15 @@ class MainController extends Controller
             $userList = self::addUserInfoAuthComment($userList);
             $userList = self::sortUserList($userList);
             
+            if ($accountType) {
+                $userList = array_values(array_filter($userList, fn($u) => ($u['accountType'] ?? 'internal') === $accountType));
+            }
+            
             return response()->json([
                 'users' => $userList,
                 'hasMore' => count($userList2) >= ($response2['data']['limit'] ?? 0),
                 'nextPage' => 3,
-                'total' => $response1['data']['count'] ?? 0
+                'total' => count($userList)
             ]);
         }
         
@@ -782,11 +787,15 @@ class MainController extends Controller
         $userList = self::addUserInfoAuthComment($userList);
         $userList = self::sortUserList($userList);
         
+        if ($accountType) {
+            $userList = array_values(array_filter($userList, fn($u) => ($u['accountType'] ?? 'internal') === $accountType));
+        }
+        
         return response()->json([
             'users' => $userList,
             'hasMore' => count($userList) >= ($response['data']['limit'] ?? 0),
             'nextPage' => $page + 1,
-            'total' => $response['data']['count'] ?? 0
+            'total' => count($userList)
         ]);
     }
 
