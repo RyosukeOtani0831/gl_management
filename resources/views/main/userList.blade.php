@@ -343,6 +343,7 @@
 window.addEventListener('load', function() {
     editModeUserOFF('Internal');
     editModeUserOFF('External');
+    setTimeout(function() { checkAndLoadMore("Internal"); checkAndLoadMore("External"); }, 500);
 });
 
 function editModeUserON(suffix) {
@@ -462,18 +463,7 @@ let hasMoreUsersInternal = true;
 let hasMoreUsersExternal = true;
 
 document.addEventListener('DOMContentLoaded', function() {
-    // タブ表示時に画面が埋まっていなければ自動追加取得
-    function checkAndLoadMore(suffix) {
-        const sectionId = suffix === 'Internal' ? 'user-internal' : 'user-external';
-        const sc = document.querySelector('#' + sectionId + ' .bg-white.rounded-lg.shadow > div');
-        if (!sc) return;
-        const hasMore = suffix === 'Internal' ? hasMoreUsersInternal : hasMoreUsersExternal;
-        if (hasMore && sc.scrollHeight <= sc.clientHeight) {
-            loadMoreUsers(suffix).then(function() {
-                setTimeout(function() { checkAndLoadMore(suffix); }, 200);
-            });
-        }
-    }
+
     // サイドバーのリンクをクリック時にチェック
     document.querySelectorAll('a[href="#user-internal"], a[href="#user-external"]').forEach(function(link) {
         link.addEventListener('click', function() {
@@ -503,10 +493,22 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
+function checkAndLoadMore(suffix) {
+    const sectionId = suffix === 'Internal' ? 'user-internal' : 'user-external';
+    const sc = document.querySelector('#' + sectionId + ' .bg-white.rounded-lg.shadow > div');
+    if (!sc) return;
+    const hasMore = suffix === 'Internal' ? hasMoreUsersInternal : hasMoreUsersExternal;
+    if (hasMore && sc.scrollHeight <= sc.clientHeight) {
+        loadMoreUsers(suffix).then(function() {
+            setTimeout(function() { checkAndLoadMore(suffix); }, 200);
+        });
+    }
+}
+
 function loadMoreUsers(suffix) {
     const isLoading = suffix === 'Internal' ? isLoadingMoreInternal : isLoadingMoreExternal;
     const hasMore = suffix === 'Internal' ? hasMoreUsersInternal : hasMoreUsersExternal;
-    if (isLoading || !hasMore) return;
+    if (isLoading || !hasMore) return Promise.resolve();
 
     if (suffix === 'Internal') { isLoadingMoreInternal = true; currentPageInternal++; }
     else { isLoadingMoreExternal = true; currentPageExternal++; }
@@ -516,7 +518,7 @@ function loadMoreUsers(suffix) {
 
     showLoadingIndicator(suffix);
 
-    fetch('/api/users/paginated?page=' + page + '&accountType=' + accountType)
+    return fetch('/api/users/paginated?page=' + page + '&accountType=' + accountType)
         .then(response => response.json())
         .then(data => {
             if (data.users && data.users.length > 0) {
