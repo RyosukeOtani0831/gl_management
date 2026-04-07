@@ -206,7 +206,8 @@ function openUserModal(type) {
     hashInput.name = 'current_hash';
     const isExternal = !document.getElementById('user-external').classList.contains('hidden');
     hashInput.value = isExternal ? 'user-external' : 'user-internal';
-    document.getElementById('userModalForm').appendChild(hashInput);
+    const modalForm = document.getElementById('userModalForm');
+    if (modalForm) modalForm.appendChild(hashInput);
     document.getElementById('modalSubmitBtn').innerText = submitText;
 
     // 送信ボタンのスタイルを動的に変更
