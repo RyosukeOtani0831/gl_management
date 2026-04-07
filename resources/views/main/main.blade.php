@@ -46,6 +46,16 @@
                     <strong>{{ $errors->first('exception') }}</strong>
                 </div>
             @endif
+            @if (session('error'))
+                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                    <strong>{{ session('error') }}</strong>
+                </div>
+            @endif
+            @if (session('success'))
+                <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+                    <strong>{{ session('success') }}</strong>
+                </div>
+            @endif
 
             <div class="tab-content">
                 @include('main/teamList')

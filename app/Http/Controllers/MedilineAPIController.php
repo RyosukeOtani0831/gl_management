@@ -307,13 +307,14 @@ class MedilineAPIController extends Controller
                     'Content-Type' => 'application/json',
                     'Adminaccesstoken' => $adminToken,
                 ],
+                'http_errors' => false,
             ]);
 
             $res = json_decode($response->getBody(), true);
 
             if ($res['status'] === 'error') {
                 if ($res['message'] === 'Email is already in use') {
-                    $res['message'] = 'このメールアドレスは登録済みです。';
+                    $res['message'] = 'このメールアドレスは既に登録されています。';
                 }
                 throw new \Exception($res['message']);
             }

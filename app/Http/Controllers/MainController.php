@@ -267,6 +267,8 @@ class MainController extends Controller
     // ユーザー作成
     public static function createUser(Request $request)
     {
+        $hash = $request->input('current_hash', 'user-internal');
+        session(['current_hash' => $hash]);
         $data = self::prepareUserData($request);
 
         $res = MedilineAPIController::postCreateUser($data);
