@@ -54,7 +54,7 @@ class MainController extends Controller
 
         $data = self::updateDisplay();
         $data["page"] = $page;
-        $data["hash"] = session('current_hash', 'user');
+        $data["hash"] = session('current_hash', 'user-internal');
         session(['current_hash' => '']);
 
         return view('main/main', $data);
@@ -270,7 +270,7 @@ class MainController extends Controller
         $data = self::prepareUserData($request);
 
         $res = MedilineAPIController::postCreateUser($data);
-        session(['current_hash' => 'user']);
+        session(['current_hash' => $request->input('current_hash', 'user-internal')]);
         return redirect()->route('main');
     }
 
@@ -283,7 +283,7 @@ class MainController extends Controller
             DeleteUserJob::dispatch($userId, session('workplaceId'));
         }
 
-        session(['current_hash' => 'user']);
+        session(['current_hash' => $request->input('current_hash', 'user-internal')]);
         return redirect()->route('main');
     }
 
@@ -325,7 +325,7 @@ class MainController extends Controller
             self::updateAuthComment($user);
         }
 
-        session(['current_hash' => 'user']);
+        session(['current_hash' => $request->input('current_hash', 'user-internal')]);
         return redirect()->route('main');
     }
 

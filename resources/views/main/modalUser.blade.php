@@ -197,6 +197,16 @@ function openUserModal(type) {
             accountTypeSelect.value = isExternal ? 'external' : 'internal';
         }
     }
+    // 現在のタブ情報をhiddenフィールドで送信
+    const existingHashInput = document.getElementById('currentHashInput');
+    if (existingHashInput) existingHashInput.remove();
+    const hashInput = document.createElement('input');
+    hashInput.type = 'hidden';
+    hashInput.id = 'currentHashInput';
+    hashInput.name = 'current_hash';
+    const isExternal = !document.getElementById('user-external').classList.contains('hidden');
+    hashInput.value = isExternal ? 'user-external' : 'user-internal';
+    document.getElementById('userModalForm').appendChild(hashInput);
     document.getElementById('modalSubmitBtn').innerText = submitText;
 
     // 送信ボタンのスタイルを動的に変更
