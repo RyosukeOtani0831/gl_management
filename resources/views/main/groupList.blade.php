@@ -14,6 +14,10 @@
                 class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition flex items-center">
             <i class="fa fa-plus mr-2"></i> 新規追加
         </button>
+        <button type="button" onclick="downloadGroupCSV()" 
+                class="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300 transition flex items-center">
+            <i class="fa fa-download mr-2"></i> リストDL
+        </button>
     </div>
 </div>
 
@@ -691,4 +695,50 @@ document.addEventListener('keydown', function(event) {
         }
     }
 });
+
+function downloadGroupCSV() {
+    const groupList = @json($groupList);
+    const userList = @json($userListAll ?? []);
+    
+    // userIdからdisplayNameを引くマップを作成
+    const userMap = {};
+    (userList || []).forEach(u => { userMap[u.id] = u.displayName || ''; });
+
+    // 最大メンバー数を求める
+    let maxMembers = 0;
+    groupList.forEach(group => {
+        if (group.users && group.users.length > maxMembers) maxMembers = group.users.length;
+    });
+
+    // ヘッダー行
+    const headers = ['ケースID', 'ケース名', 'ステータス', '登録日'];
+    for (let i = 1; i <= maxMembers; i++) headers.push('メンバー' + i);
+    const csvData = [headers.join(',')];
+
+    // データ行
+    groupList.forEach(group => {
+        const status = group.isClosed ? 'クローズ' : 'アクティブ';
+        const createdAt = group.createdAt ? new Date(group.createdAt).toLocaleDateString('ja-JP') : '';
+        const members = (group.users || []).map(u => userMap[u.userId] || '');
+        const row = [
+            group.id,
+            '"' + (group.name || '').replace(/"/g, '""') + '"',
+            status,
+            createdAt,
+            ...members.map(m => '"' + m.replace(/"/g, '""') + '"')
+        ];
+        csvData.push(row.join(','));
+    });
+
+    const csvString = csvData.join('\n');
+    const bom = '\uFEFF';
+    const blob = new Blob([bom + csvString], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'case_list.csv';
+    link.click();
+    URL.revokeObjectURL(url);
+}
+
 </script>
