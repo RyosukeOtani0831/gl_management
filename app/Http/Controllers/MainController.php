@@ -311,7 +311,7 @@ public static function createGroup(Request $request)
         // TODO: send_welcome_mail が 1 の場合にメール送信（メール機能実装後）
 
         if (!empty($errors)) {
-            session(['group_create_errors' => $errors]);
+            session()->flash('group_create_errors', $errors);
         }
 
         session(['current_hash' => 'group']);
