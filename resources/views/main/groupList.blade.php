@@ -1,3 +1,14 @@
+@if(session('group_create_errors'))
+    <div class="bg-yellow-100 border border-yellow-400 text-yellow-800 px-4 py-3 rounded mb-4">
+        <p class="font-bold">一部のユーザー作成でエラーが発生しました：</p>
+        <ul class="list-disc list-inside text-sm mt-1">
+            @foreach(session('group_create_errors') as $err)
+                <li>{{ $err }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
+
 <!-- ヘッダーセクション -->
 <div class="flex items-center justify-between mb-6">
     <div>
@@ -226,6 +237,7 @@
 </div>
 
 @include('main/modalGroup')
+@include('main/modalGroupAdd')
 
 <script>
 let currentGroupId = null;
@@ -335,11 +347,9 @@ function loadGroupMembers(groupId) {
     fetch(`/api/group/${groupId}/admin-members`)
         .then(response => response.json())
         .then(data => {
-            console.log('Loaded members:', data.members);
             
             // メンバーにはすでにisAdminフラグが付いている
             currentMembers = data.members.map(m => {
-                console.log('Member:', m.displayName, 'isAdmin:', m.isAdmin);
                 return {
                     id: m.id,
                     displayName: m.displayName,
@@ -351,8 +361,6 @@ function loadGroupMembers(groupId) {
             });
             
             allUsers = data.allUsers;
-            console.log('allUsers sample:', allUsers.slice(0, 3));
-            console.log('Current members after mapping:', currentMembers);
             renderMembers();
         })
         .catch(error => {
@@ -681,9 +689,7 @@ function confirmDeleteGroup() {
 
 // 新規追加モーダルを開く
 function openAddGroupModal() {
-    if (typeof openGroupModal !== 'undefined') {
-        openGroupModal('groupAdd');
-    }
+    openGroupAddModal();
 }
 
 // Escキーでドロワーを閉じる

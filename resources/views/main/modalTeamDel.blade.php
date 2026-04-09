@@ -35,8 +35,6 @@ function delTeamList(e) {
         }
     }
 
-    console.log(teamIds);
-
     // teamIdsが空でない場合にのみinput要素を追加
     if (teamIds.length > 0) {
         // 隠しフィールドにチームIDを追加

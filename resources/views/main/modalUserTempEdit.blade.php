@@ -38,7 +38,6 @@ function editUserTempList(e){
             userTempInfo.password = document.getElementsByName("userTempPassword" + userTempId)[0].value;
 
             const select = document.getElementsByName("userTempTeamId" + userTempId)[0];
-            console.log(select.selectedIndex);
             userTempInfo.teamId = select.selectedIndex !== undefined ? select.options[select.selectedIndex].value : -1;
 
             userTempsInfo.push(userTempInfo);

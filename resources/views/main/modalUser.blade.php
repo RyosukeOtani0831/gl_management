@@ -282,7 +282,6 @@ function editUserList(e){
         if(checkList[i].checked) {
             
             userId = checkList[i].value;
-            console.log(userId);
 
             var userInfo = new Object();
             userInfo.id = userId;

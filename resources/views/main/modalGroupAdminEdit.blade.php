@@ -45,7 +45,6 @@ function editGroupAdminList(e){
                 if ( checks[j].checked === true ) {
                     groupAdminInfo.usersIds.push(parseInt(checks[j].value));
                 }
-                console.log(groupAdminInfo.usersIds);
             }
 
             groupAdminsInfo.push(groupAdminInfo);

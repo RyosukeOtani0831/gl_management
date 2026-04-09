@@ -245,20 +245,74 @@ class MainController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\RedirectResponse
      */
-    public static function createGroup(Request $request)
+public static function createGroup(Request $request)
     {
-        $data = [
+        // ケース作成
+        $res = MedilineAPIController::postCreateGroup([
             'name' => $request->name,
             'public' => 0,
-        ];
-
-        $res = MedilineAPIController::postCreateGroup($data);
+        ]);
         $groupId = $res['data']['group']['id'];
 
+        // チームに紐付け
         MedilineAPIController::putGroupToTeam([
             'groupId' => $groupId,
-            'teamId' => $request->teamId
+            'teamId'  => $request->teamId,
         ]);
+
+        $addUserIds = [];
+        $errors = [];
+
+        // 既存ユーザーの追加
+        $existingUserIds = $request->input('existing_user_ids', []);
+        foreach ($existingUserIds as $uid) {
+            $addUserIds[] = (int)$uid;
+        }
+
+        // 新規外部ユーザーの作成
+        $newUsers = $request->input('new_users', []);
+        foreach ($newUsers as $userData) {
+            if (empty($userData['name']) || empty($userData['email'])) {
+                continue;
+            }
+            try {
+                $userPayload = [
+                    'displayName'     => $userData['name'],
+                    'kana'            => $userData['kana'] ?? '',
+                    'emailAddress'    => $userData['email'],
+                    'teamId'          => (int)$request->teamId,
+                    'accountType'     => 'external',
+                    'telephoneNumber' => '',
+                    'description'     => '',
+                    'validFrom'       => null,
+                    'validTo'         => null,
+                ];
+                $userRes = MedilineAPIController::postCreateUser($userPayload);
+                $userId = $userRes['data']['user']['id'] ?? null;
+                if ($userId) {
+                    $addUserIds[] = (int)$userId;
+                }
+            } catch (\App\Exceptions\RedirectExceptions $e) {
+                $errors[] = "「{$userData['name']}」: " . $e->getMessage();
+            } catch (\Exception $e) {
+                $errors[] = "「{$userData['name']}」: " . $e->getMessage();
+            }
+        }
+
+        // ユーザーをケースに追加
+        if (!empty($addUserIds)) {
+            MedilineAPIController::updateGroupMember([
+                'id'       => $groupId,
+                'usersIds' => array_values(array_unique($addUserIds)),
+                'admin'    => false,
+            ]);
+        }
+
+        // TODO: send_welcome_mail が 1 の場合にメール送信（メール機能実装後）
+
+        if (!empty($errors)) {
+            session(['group_create_errors' => $errors]);
+        }
 
         session(['current_hash' => 'group']);
         return redirect()->route('main');
