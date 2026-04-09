@@ -99,6 +99,7 @@
 
 <script>
 let newUserRowIndex = 0;
+const existingEmails = @json(array_column($userListAll, 'emailAddress'));
 
 function openGroupAddModal() {
     document.getElementById('groupAddModal').classList.remove('hidden');
@@ -191,7 +192,8 @@ function addNewUserRow() {
                 <label class="block text-xs font-bold text-gray-600 mb-1">メールアドレス <span class="text-red-500">*</span></label>
                 <input type="email" name="new_users[${idx}][email]"
                        class="w-full border rounded py-1.5 px-2 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-400"
-                       placeholder="例：yamada@example.com" required>
+                       placeholder="例：yamada@example.com" required
+>
             </div>
         </div>
     `;
@@ -207,6 +209,103 @@ function removeNewUserRow(idx) {
         document.getElementById('sendMailArea').classList.add('hidden');
     }
 }
+
+// 全角→半角変換 + 先頭ピリオドチェック
+function normalizeEmail(input) {
+    // 全角英数字・記号を半角に変換
+    let val = input.value.replace(/[Ａ-Ｚａ-ｚ０-９！-～]/g, function(s) {
+        return String.fromCharCode(s.charCodeAt(0) - 0xFEE0);
+    });
+    // 全角＠を半角@に
+    val = val.replace(/＠/g, '@');
+    input.value = val;
+}
+
+// 既存ユーザーとの重複チェック
+function checkDuplicateEmail(input) {
+    const val = input.value.trim().toLowerCase();
+    const row = input.closest('div[id^="newUserRow_"]');
+    let warning = row.querySelector('.email-warning');
+
+    // 先頭ピリオドチェック
+    const localPart = val.split('@')[0] ?? '';
+    if (localPart.startsWith('.')) {
+        if (!warning) {
+            warning = document.createElement('p');
+            warning.className = 'email-warning text-xs text-red-500 mt-1';
+            input.parentNode.appendChild(warning);
+        }
+        warning.textContent = 'メールアドレスの先頭にピリオドは使用できません';
+        return;
+    }
+
+    // 既存ユーザーとの重複チェック
+    const isDuplicate = val && existingEmails.some(e => e && e.toLowerCase() === val);
+    if (isDuplicate) {
+        if (!warning) {
+            warning = document.createElement('p');
+            warning.className = 'email-warning text-xs text-red-500 mt-1';
+            input.parentNode.appendChild(warning);
+        }
+        warning.textContent = 'このメールアドレスは既に登録されています';
+    } else {
+        if (warning) warning.remove();
+    }
+}
+
+// submit時に先頭ピリオドの最終チェック
+document.addEventListener('submit', function(e) {
+    if (e.target.id !== 'groupAddForm') return;
+    const emailInputs = document.querySelectorAll('#newUserRows input[type="email"]');
+    for (const input of emailInputs) {
+        const val = input.value.trim();
+        if (!val) continue;
+        const localPart = val.split('@')[0] ?? '';
+        if (localPart.startsWith('.')) {
+            e.preventDefault();
+            alert('メールアドレスの先頭にピリオドが含まれている行があります');
+            input.focus();
+            return;
+        }
+    }
+});
+
+// submit時メールバリデーション
+document.addEventListener('submit', function(e) {
+    if (e.target.id !== 'groupAddForm') return;
+    const emailInputs = document.querySelectorAll('#newUserRows input[name$="[email]"]');
+    for (const input of emailInputs) {
+        const val = input.value.trim();
+        if (!val) continue;
+        const localPart = val.split('@')[0] || '';
+        if (!val.includes('@')) {
+            e.preventDefault();
+            alert('メールアドレスに「@」が含まれていない行があります');
+            input.focus();
+            return;
+        }
+        if (localPart.startsWith('.')) {
+            e.preventDefault();
+            alert('メールアドレスの先頭にピリオドが含まれている行があります');
+            input.focus();
+            return;
+        }
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) {
+            e.preventDefault();
+            alert('メールアドレスの形式が正しくない行があります');
+            input.focus();
+            return;
+        }
+    }
+});
+
+// 新規ユーザーメール入力のイベントデリゲーション
+document.getElementById('newUserRows').addEventListener('input', function(e) {
+    if (e.target.name && e.target.name.includes('[email]')) {
+        normalizeEmail(e.target);
+        checkDuplicateEmail(e.target);
+    }
+});
 
 // 背景クリックで閉じる
 document.addEventListener('click', function(e) {
