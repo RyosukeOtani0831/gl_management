@@ -245,7 +245,7 @@ class MainController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\RedirectResponse
      */
-public static function createGroup(Request $request)
+    public static function createGroup(Request $request)
     {
         // ケース作成
         $res = MedilineAPIController::postCreateGroup([
@@ -308,7 +308,19 @@ public static function createGroup(Request $request)
             ]);
         }
 
-        // TODO: send_welcome_mail が 1 の場合にメール送信（メール機能実装後）
+        // 登録案内メール送信
+        if ($request->input('send_welcome_mail')) {
+            $workplaceName = session('workplaceName', '');
+            foreach ($newUsers as $userData) {
+                if (empty($userData['name']) || empty($userData['email'])) continue;
+                \Log::info('メール送信: ' . $userData['email']);
+                \App\Services\SesMailService::sendWelcomeMail(
+                    $userData['email'],
+                    $userData['name'],
+                    $workplaceName
+                );
+            }
+        }
 
         if (!empty($errors)) {
             session()->flash('group_create_errors', $errors);
