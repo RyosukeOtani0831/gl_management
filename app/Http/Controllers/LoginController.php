@@ -87,6 +87,7 @@ class LoginController extends Controller
             if ($workplace['id'] != 16) {
                 $user = self::findUserInWorkplace($email, $workplace['id']);
                 if ($user) {
+                    session(['workplaceName' => $workplace['name']]);
                     return $user;
                 }
             }

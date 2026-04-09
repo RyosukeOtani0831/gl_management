@@ -73,12 +73,12 @@
                         <div id="newUserRows" class="space-y-3"></div>
 
                         <!-- メール送信チェック（新規ユーザーがいる時だけ表示） -->
-                        <!-- <div id="sendMailArea" class="hidden mt-3 flex items-center gap-2">
+                        <div id="sendMailArea" class="hidden mt-3 flex items-center gap-2">
                             <input type="checkbox" name="send_welcome_mail" id="sendWelcomeMail" value="1" checked
                                    class="rounded border-gray-300 text-blue-600">
                             <label for="sendWelcomeMail" class="text-sm text-gray-700">作成した外部ユーザーに登録案内メールを送信する</label>
                         </div>
-                        <p class="text-xs text-gray-500 mt-2">※ メールアドレスが重複している場合はそのユーザーはスキップされます</p> -->
+                        <p class="text-xs text-gray-500 mt-2">※ メールアドレスが重複している場合はそのユーザーはスキップされます</p>
                     </div>
                 </div>
 

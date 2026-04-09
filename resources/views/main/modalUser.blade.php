@@ -89,8 +89,25 @@ function openUserModal(type) {
                         <input type="date" name="validTo"
                                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
                     </div>
+                    <div id="sendMailCheckArea" class="hidden">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" name="send_welcome_mail" value="1" checked
+                                   class="rounded border-gray-300 text-blue-600">
+                            <span class="text-gray-700 text-sm font-bold">登録案内メールを送信する</span>
+                        </label>
+                    </div>
                 </div>
             `;
+            // 外部ユーザーの時だけメール送信チェックを表示
+            const accountTypeSelect = document.querySelector('#userModalBody select[name="accountType"]');
+            const sendMailCheckArea = document.getElementById('sendMailCheckArea');
+            if (accountTypeSelect && sendMailCheckArea) {
+                const toggle = () => {
+                    sendMailCheckArea.classList.toggle('hidden', accountTypeSelect.value !== 'external');
+                };
+                toggle();
+                accountTypeSelect.addEventListener('change', toggle);
+            }
             formAction = "{{ action('MainController@createUser') }}";
             submitText = "作成";
             formId = "userAddForm";
